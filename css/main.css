@@ -1,0 +1,41 @@
+
+
+body{
+    margin: 10px auto;
+    width:96%;
+}
+
+.pt{
+    cursor: pointer;
+    width: 99%;
+    height: 50px;
+    transform: scale(1,1);
+    background: #666;
+    transition: transform 0.6s ease-in;
+    will-change: transform;
+}
+
+.pt-on{
+    width: 99%;
+    height: 50px;
+    transform: scale(0.1,1);
+    background: #666;
+    transition: transform 0.6s ease-out;
+    will-change: transform;
+}
+
+.pt-text{
+    color: rebeccapurple;
+    font-weight: bold;
+    animation: an-spin 30s linear infinite;
+    will-change: transform;
+}
+
+.btn-box{
+    margin: 10px auto;
+    padding: 10px auto;
+    height: 60px;
+    margin-bottom: 10px;
+    display:flex;
+    align-items: center;
+}
