@@ -7,10 +7,14 @@
     <link href="./css/main.css" rel="stylesheet">
     <script>
         $(function(){
-            const auCtx = new AudioContext()
-            var url = 'https://06mdkod2.qcloud.la/weapp/uAudio'
-            var urls = 'https://418980938.omoz.club/weapp/uAudio'
+            window.AudioContext = window.AudioContext||window.webkitAudioContext;
+            const context = new AudioContext();
+            var soundBuffer = null;
+            const url = 'https://06mdkod2.qcloud.la/weapp/uAudio'
+            const urls = 'https://418980938.omoz.club/weapp/uAudio'
+            const pre = "https://audio-1256378396.cos.ap-guangzhou.myqcloud.com/"
             var key_size = {}
+            var file_ids = new Array();
             //console.log(auCtx)
             $("#btn-all").on("click", function(){
                 $.ajax({
@@ -18,17 +22,52 @@
                     type: "post",
                     crossDomain: true,
                     success: function(data){
-                        var t_list = data.data.t_list
+                        var t_audio = data.data.t_list
                         var content = data.data.content
-                        initMap(content)
-                        initTable(t_list)
+                        //initMap(content)
+                        initMapAudio(t_audio)
+                        initTableContent(content)
                     }
                 });
             })
 
+            var loadDogSound = function(url){
+                var request = new XMLHttpRequest();
+                request.open('GET', url, true);
+                request.setRequestHeader('Accept','text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
+                request.setRequestHeader('Content-Type','audio/mp3')
+                request.responseType= 'arraybuffer';
+                
+                //下面就是对音频文件的异步解析
+                request.onload = function(){
+                        context.decodeAudioData(request.response,function(buffer){
+                        soundBuffer = buffer
+                    },onError)
+                }
+
+                request.send()
+            }
+
+            var playSound = function (buffer){
+                var source = context.createBufferSource();
+                source = context.createBuffersource();//创建一个音频源 相当于是装音频的容器
+                source.buffer = buffer;//  告诉音频源 播放哪一段音频
+                source.connect(context.destination);// 连接到输出源
+                source.start();//开始播放
+            }
+
+            var initMapAudio = function(t_audio){
+                console.log("initMapAudio")
+                //console.log(t_audio)
+                for (let val of t_audio){
+                    var file_id = val.file_id
+                    file_ids.push(file_id)
+                }
+            }
+
             var initMap = function(content){
                 console.log("init_map")
-                //console.log(t_list)
+                //console.log(content)
                 for (let val of content){
                     var Key = val.Key
                     var kk = Key.substr(0, Key.indexOf("."))
@@ -36,14 +75,49 @@
                 }
             }
 
-            var initTable = function(t_list){
-                console.log("init_table")
-                //console.log(t_list)
-                //t_list.sort((a,b) => {return a.c_name > b.c_name})
-                //console.log(t_list)
+            var initTableContent = function(content){
+                console.log("init_content")
+                //console.log(file_ids)
+                //console.log(t_audio)
+                //t_audio.sort((a,b) => {return a.c_name > b.c_name})
+                //console.log(t_audio)
                 //console.log(key_size)
-                for (let [i,v] of t_list.entries()){
-                    console.log(v)
+                for (let [i,v] of content.entries()){
+                    //console.log(v)
+                    var line = i+1
+                    var file_id = v.Key.substr(0, v.Key.indexOf("."))
+                    if (file_ids.includes(file_id)) continue
+                    var src = pre + v.Key
+                    var ks = file_id.split("_")
+                    var level = ks[0]
+                    var file_id = file_id
+                    var s_name = ks[1]
+                    var ski = ks[2]
+                    var ver = ks[3]
+                    var size = v.Size
+                    var u_date = v.LastModified
+                    var d_td = `<tr><td>${line}</td><td>${level}</td><td class="src_play" id="${src}">${file_id}</td><td>${s_name}</td><td>${ski}</td><td>${ver}</td><td>${size}</td><td>${u_date}</td></tr>`
+                    $("#t_content > tbody").append(d_td)
+                }
+
+                //table函数绑定
+                $("#t_content .src_play").click(function(){
+                    console.log("src_click")
+                    var src_audio = $(this).attr("id")
+                    console.log(src_audio)
+                    loadDogSound(src_audio)
+                    console.log(soundBuffer)
+                })
+            }
+
+            var initTable = function(t_audio){
+                console.log("init_table")
+                //console.log(t_audio)
+                //t_audio.sort((a,b) => {return a.c_name > b.c_name})
+                //console.log(t_audio)
+                //console.log(key_size)
+                for (let [i,v] of t_audio.entries()){
+                    //console.log(v)
                     var line = i+1
                     var file_id = v.file_id
                     var c_name = v.c_name
@@ -90,7 +164,7 @@
     </div>
     <hr>
     <div class="">
-        <table class="table table-bordered table-striped table-hover">
+        <table id="t_audio" class="table table-bordered table-striped table-hover hidden">
             <thead>
                 <tr>
                     <th>#</th>
@@ -103,6 +177,23 @@
                     <th>cate</th>
                     <th>c_date</th>
                     <th>status</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+        <table id="t_content" class="table table-bordered table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>level</th>
+                    <th>file_id</th>
+                    <th>s_name</th>
+                    <th>ski</th>
+                    <th>ver</th>
+                    <th>size</th>
+                    <th>u_date</th>
                 </tr>
             </thead>
             <tbody>
