@@ -5,6 +5,9 @@ body{
     width:96%;
 }
 
+.pointer{
+    cursor: pointer;
+}
 .pt{
     cursor: pointer;
     width: 99%;
