@@ -8,6 +8,74 @@ body{
 .pointer{
     cursor: pointer;
 }
+
+.box-content{
+    display: flex;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin: 5px 0 5px;
+    padding: 5px 5px;
+}
+
+.box-img{
+    border:1px solid #eee;
+    margin-right: 5px;
+    height: 100px;
+    width: 100px;
+    background-color: #999;
+    border-radius: 5px;
+}
+
+.up-image{
+    width:98px;
+    height:98px;
+    opacity: 0;
+}
+
+.box-text{
+    border:1px solid #eee;
+    border-radius: 5px;
+    padding: 5px 10px;
+    height: 100px;
+    width: 86%;
+}
+
+.box-shadow{
+    height: 110px;
+    width: 100%;
+    display:flex;
+    align-items:center;
+    overflow: hidden;
+
+    border:1px solid #eee;
+    border-radius: 5px;
+    margin: 5px 0 5px;
+    padding: 5px 5px;
+}
+
+.k10{
+    height: 10px;
+}
+.k20{
+    height: 20px;
+}
+.k30{
+    height: 30px;
+}
+.k40{
+    height: 40px;
+}
+.k50{
+    height: 50px;
+}
+
+.ele {
+    flex-shrink: 0;
+    width: 6px;
+    background-color: #ddd;
+    box-shadow: 0px 0px 1px 1px #fff;
+}
+
 .pt{
     cursor: pointer;
     width: 99%;

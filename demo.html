@@ -98,16 +98,22 @@
                     var ver = ks[3]
                     var size = v.Size
                     var u_date = v.LastModified
-                    var d_td = `<tr><td>${line}</td><td>${level}</td><td class="src_play pointer" id="${src}">${file_id}</td><td class="pointer">${s_name}</td><td>${ski}</td><td>${ver}</td><td>${size}</td><td>${u_date}</td></tr>`
+                    var d_td = `<tr><td>${line}</td><td>${level}</td><td class="src-play pointer" id="${src}">${file_id}</td><td class="prepare pointer" data="${src}">${s_name}</td><td>${ski}</td><td>${ver}</td><td>${size}</td><td>${u_date}</td></tr>`
                     $("#t_content > tbody").append(d_td)
                 }
 
                 //table函数绑定
-                $("#t_content .src_play").click(function(){
+                $("#t_content .src-play").click(function(){
                     console.log("src_click")
                     var src_audio = $(this).attr("id")
                     console.log(src_audio)
                     loadDogSound(src_audio)
+                })
+
+                $("#t_content .prepare").click(function(){
+                    console.log("prepare_click")
+                    var src_audio = $(this).attr("data")
+                    console.log(src_audio)
                 })
             }
 
@@ -134,6 +140,16 @@
                     $("tbody").append(d_td)
                 }
             }
+
+            //点击事件
+            $("#ke").on("click",function(){
+                console.log("ke")
+                $("#modal_to").modal("show")
+            })
+
+            $("#up-image").on("change",function(){
+                console.log($(this))
+            })
         })
 
 
@@ -142,6 +158,61 @@
 </header>
 
 <body>
+
+    <div id="modal_to" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="to_list">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="box-content">
+                                <div class="box-img">
+                                    <input id="up-image" class="up-image" type="file"/>
+                                </div>
+                                <div class="box-text">
+                                    <p class="text-primary"><strong>什么标题</strong></p>
+                                    <p class="text-primary">小猪佩奇身上纹,掌声送给社会人</p>
+                                    <p class="text-primary">Nothing fuck you harder then time</p>
+                                </div>
+                            </div>
+                            <div class="box-shadow">
+                                <div class="ele k50"></div>
+                            </div>
+                            <hr>
+                            <form id="form-rule" class="form-horizontal">
+                                <div class="form-group">
+                                    <label for="filter-startw" class="text-primary col-sm-2 control-label">开头字符:</label>
+                                    <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="filter-startw" placeholder="">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="filter-endw" class="text-primary col-sm-2 control-label">结尾字符:</label>
+                                    <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="filter-endw" placeholder="">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="filter-notc" class="text-primary col-sm-2 control-label">剔除字符:</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" class="form-control" id="filter-notc" placeholder="">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary">保存</button>
+                    </div>
+            </div>
+        </div>
+    </div>
+<!-- modal end -->
+
     <hr>
     <div class="btn-group" data-toggle="buttons">
         <label class="btn btn-default active">
@@ -159,7 +230,7 @@
         <label class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">N
         </label>
-        <label class="btn btn-default">
+        <label id="ke" class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">呱呱
         </label>
     </div>
