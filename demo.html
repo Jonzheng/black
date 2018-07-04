@@ -30,7 +30,7 @@
                 });
             })
 
-            var loadDogSound = function(url){
+            var loadSound = function(url){
                 var request = new XMLHttpRequest();
                 request.open('GET', url, true);
                 //request.setRequestHeader('Accept','text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
@@ -49,12 +49,85 @@
 
                 request.send()
             }
+            var formatShadow = function(_shadow){
+                var shadow = []
+                //使数据过渡更顺滑
+                for (let v of _shadow){
+                    if (_shadow[v] < _shadow[v + 1] / 2){
+                        _shadow[v] = _shadow[v + 1] / 2;
+                    }
+                    if (_shadow[v] / 2 > _shadow[v + 1]){
+                        _shadow[v + 1] = _shadow[v] / 2;
+                    }
+                }
+                var _max = 0
+                for (let v of _shadow){
+                    if (v % 4 == 0){
+                        let av = (_shadow[v] + _shadow[v + 1] + _shadow[v + 2] + _shadow[v + 3]) / 4
+                        let sam = Math.round(av)
+                        shadow.push(sam)
+                        if (sam > _max) _max = sam
+                    }
+                }
+                for (let v of shadow){
+                    if (shadow[v] < shadow[v + 1] / 2) {
+                        shadow[v] = Math.round(shadow[v + 1] / 2);
+                    }
+                    if (shadow[v] / 2 > shadow[v + 1]) {
+                        shadow[v + 1] = Math.round(shadow[v] / 2);
+                    }
+                }
+                var rate = 100 / _max
+                for (let v of shadow){
+                    if (shadow[v] > 3) shadow[v] = Math.round(shadow[v] * rate)
+                }
+                console.log(shadow)
+            }
+
+            var getShadow = function(analyser, dataArray, duration){
+                var _shadow = []
+                var intv = 20
+                console.log(duration)
+                var dura = 0
+                var inter_id = setInterval(function () {
+                    analyser.getByteTimeDomainData(dataArray);
+                    //console.log(dataArray)
+                    var sum = 0
+                    for(let v of dataArray){
+                        sum += v
+                    }
+                    var h = Math.abs(8192 - sum) / 10
+                    if (h < 3) h = 3
+                    _shadow.push(h)
+                    dura += intv
+                    if (dura > duration){
+                        console.log(_shadow)
+                        formatShadow(_shadow)
+                        clearInterval(inter_id)
+                    }
+                }, intv);
+            }
 
             var playSound = function (buffer){
                 var source = context.createBufferSource();
-                source.buffer = buffer;//  告诉音频源 播放哪一段音频
-                source.connect(context.destination);// 连接到输出源
-                source.start();//开始播放
+                var analyser = context.createAnalyser();
+                source.buffer = buffer;
+                source.connect(analyser);
+                analyser.connect(context.destination);
+                analyser.fftSize = 128;
+                var bufferLength = analyser.frequencyBinCount;
+                var dataArray = new Uint8Array(bufferLength);
+                analyser.getByteFrequencyData(dataArray);
+                console.log("1:")
+                console.log(dataArray)
+                source.start();
+                console.log(dataArray)
+                analyser.getByteTimeDomainData(dataArray);
+                console.log("dataArray:")
+                console.log(dataArray)
+                console.log("--------------")
+                var duration = buffer.duration*1000
+                getShadow(analyser, dataArray, duration)
             }
 
             var initMapAudio = function(t_audio){
@@ -98,7 +171,7 @@
                     var ver = ks[3]
                     var size = v.Size
                     var u_date = v.LastModified
-                    var d_td = `<tr><td>${line}</td><td>${level}</td><td class="src-play pointer" id="${src}">${file_id}</td><td class="prepare pointer" data="${src}">${s_name}</td><td>${ski}</td><td>${ver}</td><td>${size}</td><td>${u_date}</td></tr>`
+                    var d_td = `<tr><td>${line}</td><td>${level}</td><td class="src-play pointer" id="${src}">${file_id}</td><td class="prepare pointer" data-file_id="${file_id}" data-src="${src}">${s_name}</td><td>${ski}</td><td>${ver}</td><td>${size}</td><td>${u_date}</td></tr>`
                     $("#t_content > tbody").append(d_td)
                 }
 
@@ -107,13 +180,18 @@
                     console.log("src_click")
                     var src_audio = $(this).attr("id")
                     console.log(src_audio)
-                    loadDogSound(src_audio)
+                    loadSound(src_audio)
                 })
 
                 $("#t_content .prepare").click(function(){
                     console.log("prepare_click")
-                    var src_audio = $(this).attr("data")
+                    var src_audio = $(this).data("src")
+                    var file_id = $(this).data("file_id")
+                    console.log(file_id)
                     console.log(src_audio)
+                    $("#m-title").text(file_id)
+                    $("#src-audio").text(src_audio)
+                    $("#modal-to").modal("show")
                 })
             }
 
@@ -144,11 +222,17 @@
             //点击事件
             $("#ke").on("click",function(){
                 console.log("ke")
-                $("#modal_to").modal("show")
+                $("#modal-to").modal("show")
             })
 
             $("#up-image").on("change",function(){
                 console.log($(this))
+            })
+
+            $("#box-shadow").on("click",function(){
+                var src_audio = $("#src-audio").text()
+                console.log(src_audio)
+                loadSound(src_audio)
             })
         })
 
@@ -159,26 +243,27 @@
 
 <body>
 
-    <div id="modal_to" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="to_list">
+    <div id="modal-to" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="to_list">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                        <h4 class="modal-title" id="m-title">file_id</h4>
                         </div>
 
                         <div class="modal-body">
                             <div class="box-content">
                                 <div class="box-img">
-                                    <input id="up-image" class="up-image" type="file"/>
+                                    <input id="up-image" class="up-image" type="file">
                                 </div>
                                 <div class="box-text">
+                                    <p id="src-audio" class="hidden"></p>
                                     <p class="text-primary"><strong>什么标题</strong></p>
                                     <p class="text-primary">小猪佩奇身上纹,掌声送给社会人</p>
                                     <p class="text-primary">Nothing fuck you harder then time</p>
                                 </div>
                             </div>
-                            <div class="box-shadow">
+                            <div id="box-shadow" class="box-shadow">
                                 <div class="ele k50"></div>
                             </div>
                             <hr>
