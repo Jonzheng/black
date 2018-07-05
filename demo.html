@@ -52,41 +52,60 @@
             var formatShadow = function(_shadow){
                 var shadow = []
                 //使数据过渡更顺滑
-                for (let v of _shadow){
-                    if (_shadow[v] < _shadow[v + 1] / 2){
-                        _shadow[v] = _shadow[v + 1] / 2;
+                for (let i = 0; i < _shadow.length; i++) {
+                    if (_shadow[i] < _shadow[i + 1] / 2){
+                        _shadow[i] = _shadow[i + 1] / 2;
                     }
-                    if (_shadow[v] / 2 > _shadow[v + 1]){
-                        _shadow[v + 1] = _shadow[v] / 2;
+                    if (_shadow[i] / 2 > _shadow[i + 1]){
+                        _shadow[i + 1] = _shadow[i] / 2;
                     }
                 }
+                console.log(_shadow)
                 var _max = 0
-                for (let v of _shadow){
-                    if (v % 4 == 0){
-                        let av = (_shadow[v] + _shadow[v + 1] + _shadow[v + 2] + _shadow[v + 3]) / 4
+                for (let i = 0; i < _shadow.length; i++) {
+                    if (i % 9 == 0){
+                        let av = (_shadow[i] + _shadow[i + 1] + _shadow[i + 2] + _shadow[i + 3]+ _shadow[i + 4]+ _shadow[i + 5]+ _shadow[i + 6]+ _shadow[i + 7]+ _shadow[i + 8]) / 9
+                        //console.log(av)
                         let sam = Math.round(av)
                         shadow.push(sam)
                         if (sam > _max) _max = sam
                     }
                 }
-                for (let v of shadow){
-                    if (shadow[v] < shadow[v + 1] / 2) {
-                        shadow[v] = Math.round(shadow[v + 1] / 2);
+                console.log(shadow)
+                for (let i = 0; i < shadow.length; i++) {
+                    if (shadow[i] < shadow[i + 1] / 2) {
+                        shadow[i] = Math.round(shadow[i + 1] / 2);
                     }
-                    if (shadow[v] / 2 > shadow[v + 1]) {
-                        shadow[v + 1] = Math.round(shadow[v] / 2);
+                    if (shadow[i] / 2 > shadow[i + 1]) {
+                        shadow[i + 1] = Math.round(shadow[i] / 2);
                     }
                 }
                 var rate = 100 / _max
-                for (let v of shadow){
-                    if (shadow[v] > 3) shadow[v] = Math.round(shadow[v] * rate)
+                for (let i = 0; i < shadow.length; i++) {
+                    if (shadow[i] > 3) shadow[i] = Math.round(shadow[i] * rate)
                 }
-                console.log(shadow)
+                shadow.pop()
+                var fn = 100-shadow.length
+                if (fn > 0){
+                    var fill_st = new Array(fn)
+                    fill_st.fill(3)
+                    shadow = shadow.concat(fill_st)
+                }
+                return shadow
+            }
+
+            var initBoxShadow = function(shadow){
+                console.log("initBoxShadow")
+                $("#box-shadow > div").remove()
+                for (let v of shadow){
+                    var d_sd = `<div class="ele" style="height:${v}px"></div>`
+                    $("#box-shadow").append(d_sd)
+                }
             }
 
             var getShadow = function(analyser, dataArray, duration){
                 var _shadow = []
-                var intv = 20
+                var intv = 10
                 console.log(duration)
                 var dura = 0
                 var inter_id = setInterval(function () {
@@ -102,7 +121,9 @@
                     dura += intv
                     if (dura > duration){
                         console.log(_shadow)
-                        formatShadow(_shadow)
+                        var shadow = formatShadow(_shadow)
+                        console.log(shadow)
+                        initBoxShadow(shadow)
                         clearInterval(inter_id)
                     }
                 }, intv);
