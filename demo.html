@@ -14,7 +14,6 @@
             const pre = "https://audio-1256378396.cos.ap-guangzhou.myqcloud.com/"
             var key_size = {}
             var file_ids = new Array();
-            //console.log(auCtx)
             $("#btn-all").on("click", function(){
                 $.ajax({
                     url: url,
@@ -30,7 +29,7 @@
                 });
             })
 
-            var loadSound = function(url){
+            var loadSound = function(url,code){
                 var request = new XMLHttpRequest();
                 request.open('GET', url, true);
                 //request.setRequestHeader('Accept','text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
@@ -40,8 +39,12 @@
                 //下面就是对音频文件的异步解析
                 request.onload = function(){
                         context.decodeAudioData(request.response,function(buffer){
-                            console.log(buffer)
-                            playSound(buffer)
+                            if(code == 1){
+                                playSound(buffer)
+                            }else{
+                                listenSound(buffer)
+                            }
+                            
                     },function(err){
                         console.log(err)
                     })
@@ -60,18 +63,17 @@
                         _shadow[i + 1] = _shadow[i] / 2;
                     }
                 }
-                console.log(_shadow)
+                //每9个数据取平均值
                 var _max = 0
                 for (let i = 0; i < _shadow.length; i++) {
                     if (i % 9 == 0){
                         let av = (_shadow[i] + _shadow[i + 1] + _shadow[i + 2] + _shadow[i + 3]+ _shadow[i + 4]+ _shadow[i + 5]+ _shadow[i + 6]+ _shadow[i + 7]+ _shadow[i + 8]) / 9
-                        //console.log(av)
                         let sam = Math.round(av)
                         shadow.push(sam)
                         if (sam > _max) _max = sam
                     }
                 }
-                console.log(shadow)
+                //使数据过渡更顺滑--取整
                 for (let i = 0; i < shadow.length; i++) {
                     if (shadow[i] < shadow[i + 1] / 2) {
                         shadow[i] = Math.round(shadow[i + 1] / 2);
@@ -80,10 +82,20 @@
                         shadow[i + 1] = Math.round(shadow[i] / 2);
                     }
                 }
+                //变换数据--最大值100
                 var rate = 100 / _max
                 for (let i = 0; i < shadow.length; i++) {
-                    if (shadow[i] > 3) shadow[i] = Math.round(shadow[i] * rate)
+                    if (shadow[i] > 3){
+                        shadow[i] = Math.round(shadow[i] * rate)
+                    }
+                    if (shadow[i] < 3){
+                        shadow[i] = 3
+                    }
+                    if (shadow[i] == 4){
+                        shadow[i] = 5
+                    }
                 }
+                //填充到100个元素
                 shadow.pop()
                 var fn = 100-shadow.length
                 if (fn > 0){
@@ -96,9 +108,11 @@
 
             var initBoxShadow = function(shadow){
                 console.log("initBoxShadow")
-                $("#box-shadow > div").remove()
+                var s_shadow = shadow + ""
+                $("#btn-save").data("s_shadow", s_shadow)
+                $("#box-shadow > span").remove()
                 for (let v of shadow){
-                    var d_sd = `<div class="ele" style="height:${v}px"></div>`
+                    var d_sd = `<span class="ele" style="height:${v}px"></span>`
                     $("#box-shadow").append(d_sd)
                 }
             }
@@ -110,7 +124,6 @@
                 var dura = 0
                 var inter_id = setInterval(function () {
                     analyser.getByteTimeDomainData(dataArray);
-                    //console.log(dataArray)
                     var sum = 0
                     for(let v of dataArray){
                         sum += v
@@ -120,13 +133,21 @@
                     _shadow.push(h)
                     dura += intv
                     if (dura > duration){
-                        console.log(_shadow)
+                        //console.log(_shadow)
                         var shadow = formatShadow(_shadow)
                         console.log(shadow)
                         initBoxShadow(shadow)
                         clearInterval(inter_id)
                     }
                 }, intv);
+            }
+
+            var listenSound = function (buffer){
+                console.log("listenSound:")
+                var source = context.createBufferSource();
+                source.buffer = buffer;
+                source.connect(context.destination);
+                source.start();
             }
 
             var playSound = function (buffer){
@@ -139,14 +160,8 @@
                 var bufferLength = analyser.frequencyBinCount;
                 var dataArray = new Uint8Array(bufferLength);
                 analyser.getByteFrequencyData(dataArray);
-                console.log("1:")
-                console.log(dataArray)
                 source.start();
-                console.log(dataArray)
                 analyser.getByteTimeDomainData(dataArray);
-                console.log("dataArray:")
-                console.log(dataArray)
-                console.log("--------------")
                 var duration = buffer.duration*1000
                 getShadow(analyser, dataArray, duration)
             }
@@ -170,16 +185,37 @@
                 }
             }
 
+            $("#s-title,#s-serifu,#s-roma").on("keyup",function(){
+                var cur_id = $(this).attr("id")
+                var p_id = "#p" + cur_id.substr(1)
+                //console.log(cur_id, p_id)
+                $(p_id).text($(this).val())
+            })
+
+            $("#btn-save").on("click",function(){
+                console.log("save")
+                var title = $("#p-title").text()
+                var serifu = $("#p-serifu").text()
+                var roma = $("#p-roma").text()
+                var s_shadow = $(this).data("s_shadow")
+                console.log(s_shadow)
+                var src_image = $("#up-image").val()
+                console.log(src_image)
+            })
+
+            var initModal = function(file_id, src_audio){
+                $("#m-title").text(file_id)
+                $("#src-audio").text(src_audio)
+                $("#s-title").val("")
+                $("#s-serifu").val("")
+                $("#s-roma").val("")
+            }
+
             var initTableContent = function(content){
                 console.log("init_content")
                 $("#t_content > tbody tr").remove()
-                //console.log(file_ids)
-                //console.log(t_audio)
                 //t_audio.sort((a,b) => {return a.c_name > b.c_name})
-                //console.log(t_audio)
-                //console.log(key_size)
                 for (let [i,v] of content.entries()){
-                    //console.log(v)
                     var line = i+1
                     var file_id = v.Key.substr(0, v.Key.indexOf("."))
                     if (file_ids.includes(file_id)) continue
@@ -200,30 +236,23 @@
                 $("#t_content .src-play").click(function(){
                     console.log("src_click")
                     var src_audio = $(this).attr("id")
-                    console.log(src_audio)
-                    loadSound(src_audio)
+                    loadSound(src_audio, 0)
                 })
 
                 $("#t_content .prepare").click(function(){
                     console.log("prepare_click")
                     var src_audio = $(this).data("src")
                     var file_id = $(this).data("file_id")
-                    console.log(file_id)
-                    console.log(src_audio)
-                    $("#m-title").text(file_id)
-                    $("#src-audio").text(src_audio)
+                    initModal(file_id, src_audio)
+                    initBoxShadow([])
                     $("#modal-to").modal("show")
                 })
             }
 
             var initTable = function(t_audio){
                 console.log("init_table")
-                //console.log(t_audio)
                 //t_audio.sort((a,b) => {return a.c_name > b.c_name})
-                //console.log(t_audio)
-                //console.log(key_size)
                 for (let [i,v] of t_audio.entries()){
-                    //console.log(v)
                     var line = i+1
                     var file_id = v.file_id
                     var c_name = v.c_name
@@ -247,13 +276,30 @@
             })
 
             $("#up-image").on("change",function(){
-                console.log($(this))
+                var $img = $(this).next("img")
+                var $file = $(this);
+                var fileObj = $file[0];
+                var windowURL = window.URL || window.webkitURL;
+                var dataURL;
+
+                if (fileObj && fileObj.files && fileObj.files[0]) {
+                    dataURL = windowURL.createObjectURL(fileObj.files[0]);
+                    $img.attr('src', dataURL);
+                } else {
+                    dataURL = $file.val();
+                    var imgObj = document.getElementById("preview");
+                    imgObj.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod=scale)";
+                    imgObj.filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = dataURL;
+    
+                }
+
+
             })
 
-            $("#box-shadow").on("click",function(){
+            $("#btn-play").on("click",function(){
                 var src_audio = $("#src-audio").text()
                 console.log(src_audio)
-                loadSound(src_audio)
+                loadSound(src_audio, 1)
             })
         })
 
@@ -264,47 +310,45 @@
 
 <body>
 
-    <div id="modal-to" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="to_list">
+    <div id="modal-to" class="modal fade bs-example-modal-lg" aria-hidden="true" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="to_list">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                         <h4 class="modal-title" id="m-title">file_id</h4>
                         </div>
 
                         <div class="modal-body">
                             <div class="box-content">
-                                <div class="box-img">
-                                    <input id="up-image" class="up-image" type="file">
-                                </div>
+                                <input id="up-image" class="up-image pointer" type="file">
+                                <img class="box-img" src="">
                                 <div class="box-text">
                                     <p id="src-audio" class="hidden"></p>
-                                    <p class="text-primary"><strong>什么标题</strong></p>
-                                    <p class="text-primary">小猪佩奇身上纹,掌声送给社会人</p>
-                                    <p class="text-primary">Nothing fuck you harder then time</p>
+                                    <strong><p id="p-title" class="text-primary"></p></strong>
+                                    <p id="p-serifu" class="text-primary"></p>
+                                    <p id="p-roma" class="text-primary"></p>
                                 </div>
                             </div>
                             <div id="box-shadow" class="box-shadow">
-                                <div class="ele k50"></div>
+                                <div id="btn-play" class="box-img pointer"></div>
                             </div>
                             <hr>
                             <form id="form-rule" class="form-horizontal">
                                 <div class="form-group">
-                                    <label for="filter-startw" class="text-primary col-sm-2 control-label">开头字符:</label>
+                                    <label for="filter-startw" class="text-primary col-sm-2 control-label">标题:</label>
                                     <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="filter-startw" placeholder="">
+                                        <input id="s-title" type="text" class="form-control">
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="filter-endw" class="text-primary col-sm-2 control-label">结尾字符:</label>
+                                    <label for="filter-endw" class="text-primary col-sm-2 control-label">台词:</label>
                                     <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="filter-endw" placeholder="">
+                                    <input id="s-serifu" type="text" class="form-control">
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="filter-notc" class="text-primary col-sm-2 control-label">剔除字符:</label>
+                                    <label for="filter-notc" class="text-primary col-sm-2 control-label">罗马音:</label>
                                     <div class="col-sm-9">
-                                        <input type="text" class="form-control" id="filter-notc" placeholder="">
+                                        <input id="s-roma" type="text" class="form-control">
                                     </div>
                                 </div>
                             </form>
@@ -312,7 +356,7 @@
 
                         <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                        <button type="button" class="btn btn-primary">保存</button>
+                        <button id="btn-save" type="button" class="btn btn-primary">保存</button>
                     </div>
             </div>
         </div>
@@ -325,16 +369,7 @@
             <input type="radio" name="options" autocomplete="off" checked>全部
         </label>
         <label id='btn-all' class="btn btn-default">
-            <input type="radio" name="options" autocomplete="off">SSR
-        </label>
-        <label class="btn btn-default">
-            <input type="radio" name="options" autocomplete="off">SR
-        </label>
-        <label class="btn btn-default">
-            <input type="radio" name="options" autocomplete="off">R
-        </label>
-        <label class="btn btn-default">
-            <input type="radio" name="options" autocomplete="off">N
+            <input type="radio" name="options" autocomplete="off">待发布
         </label>
         <label id="ke" class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">呱呱
