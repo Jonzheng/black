@@ -16,6 +16,7 @@
             const pre = "https://audio-1256378396.cos.ap-guangzhou.myqcloud.com/"
             var key_size = {}
             var file_ids = new Array();
+            $("table").hide()
             $("#btn-all").on("click", function(){
                 $.ajax({
                     url: url,
@@ -231,6 +232,8 @@
 
             var initTableContent = function(content){
                 console.log("init_content")
+                $("table").hide()
+                $("#t_content").show()
                 $("#t_content > tbody tr").remove()
                 //t_audio.sort((a,b) => {return a.c_name > b.c_name})
                 for (let [i,v] of content.entries()){
@@ -267,6 +270,22 @@
                 })
             }
 
+            var initTableQuestion = function(t_question){
+                $("table").hide()
+                $("#t_question").show()
+                console.log(t_question)
+                for (let [i,v] of t_question.entries()){
+                    var line = i+1
+                    var level = v.level
+                    var title = v.title
+                    var difficulty = v.difficulty
+                    var uploader = v.uploader
+                    var c_date = v.c_date
+                    var d_td = `<tr><td>${line}</td><td>${level}</td><td class="pointer">${title}</td><td>${difficulty}</td><td>${uploader}</td><td>${c_date}</td></tr>`
+                    $("#t_question > tbody").append(d_td)
+                }
+            }
+
             var initTable = function(t_audio){
                 console.log("init_table")
                 //t_audio.sort((a,b) => {return a.c_name > b.c_name})
@@ -283,14 +302,15 @@
                     var ver = v.ver
                     var status = v.status
                     var d_td = `<tr><td>${line}</td><td>${level}</td><td>${file_id}</td><td>${c_name}</td><td>${ski}</td><td>${ver}</td><td>${s_name}</td><td>${cate}</td><td>${c_date}</td><td>${status}</td></tr>`
-                    $("tbody").append(d_td)
+                    $("#t_audio > tbody").append(d_td)
                 }
             }
 
             //点击事件
-            $("#ke").on("click",function(){
-                console.log("ke")
-                $("#modal-to").modal("show")
+            $("#btn-question").on("click",function(){
+                console.log("btn-question")
+                var t_question = [{"level":"N4","title":"新手测试1","difficulty":"0.9","uploader":"Jono","c_date":"2018-07-08"}]
+                initTableQuestion(t_question)
             })
 
             $("#file").on("change",function(){
@@ -397,13 +417,13 @@
         <label id='btn-all' class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">待发布
         </label>
-        <label id="ke" class="btn btn-default">
+        <label id="btn-question" class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">呱呱
         </label>
     </div>
     <hr>
     <div class="">
-        <table id="t_audio" class="table table-bordered table-striped table-hover hidden">
+        <table id="t_audio" class="table table-bordered table-striped table-hover">
             <thead>
                 <tr>
                     <th>#</th>
@@ -433,6 +453,21 @@
                     <th>ver</th>
                     <th>size</th>
                     <th>u_date</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+        <table id="t_question" class="table table-bordered table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>level</th>
+                    <th>title</th>
+                    <th>difficulty(0.0~0.9)</th>
+                    <th>uploader</th>
+                    <th>c_date</th>
                 </tr>
             </thead>
             <tbody>
