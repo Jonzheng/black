@@ -9,6 +9,10 @@ body{
     cursor: pointer;
 }
 
+.black-border{
+    border: 1px solid black;
+}
+
 .box-content{
     display: flex;
     border: 1px solid #ddd;
@@ -38,6 +42,24 @@ body{
     padding: 5px 10px;
     height: 100px;
     width: 86%;
+}
+
+.box-question-title{
+    padding: 5px 10px;
+    height: 100px;
+    width: 100%;
+}
+
+.box-question{
+    border: 1px solid #5bc0de;
+    padding: 20px 10px;
+    margin: 20px;
+    border-radius: 5px;
+    text-align: center;
+}
+.go-level{
+    width: 16%;
+    margin-right: 46px;
 }
 
 .box-shadow{
