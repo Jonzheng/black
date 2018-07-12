@@ -292,11 +292,9 @@
                 })
 
                 $(".pointer").on("mouseover",function(){
-                    console.log("over")
                     $(this).addClass("bg-info")
                 })
                 $(".pointer").on("mouseout",function(){
-                    console.log("out")
                     $(this).removeClass("bg-info")
                 })
             }
@@ -432,8 +430,7 @@
                 </div>
 
                     <div class="modal-body">
-                        <form id="que-form" class="form-horizontal" enctype="multipart/form-data">
-
+                        <form id="form-que-title" class="form-horizontal" enctype="multipart/form-data">
                             <div class="box-content">
                                 <div class="box-question-title">
                                     <div class="form-group">
@@ -472,11 +469,11 @@
                                     
                                 </div>
                             </div>
-
-                            <hr>
+                        </form>
+                        <hr>
     <div class="btn-group" data-toggle="buttons">
         <label class="btn btn-default">
-            <input type="radio" name="options" id="option1" autocomplete="off">全部预览
+            <input type="radio" name="options" id="option1" autocomplete="off">试卷预览
         </label>
         <label class="btn btn-default active">
             <input type="radio" name="options" id="option2" autocomplete="off" checked>选择题
@@ -485,67 +482,88 @@
             <input type="radio" name="options" id="option3" autocomplete="off">阅读题
         </label>
         <label class="btn btn-default">
-            <input type="radio" name="options" id="option4" autocomplete="off">听解题
+            <input type="radio" name="options" id="option4" autocomplete="off">听解题(I)
+        </label>
+        <label class="btn btn-default">
+            <input type="radio" name="options" id="option4" autocomplete="off">听解题(II)
         </label>
     </div>
-                            <hr>
+            <hr>
+            <div class="box-question">
+                <form id="form-que-1" class="form-horizontal" enctype="multipart/form-data">
 
-                        <div class="box-question">
-                            <div class="form-group">
-                                <label class="text-primary col-sm-2 control-label">编号:</label>
-                                <div class="col-sm-9">
-                                    <input id="" name="" type="text" class="form-control">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="text-primary col-sm-2 control-label">题目:</label>
-                                <div class="col-sm-9">
-                                    <textarea class="form-control" rows="3"></textarea>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="text-primary col-sm-2 control-label">选项A:</label>
-                                <div class="col-sm-6">
-                                    <input id="" name="" type="text" class="form-control">
-                                </div>
-                                <button type="button" class="btn btn-default col-sm-2">正解</button>
-                            </div>
-                            <div class="form-group">
-                                <label class="text-primary col-sm-2 control-label">选项B:</label>
-                                <div class="col-sm-6">
-                                    <input id="" name="" type="text" class="form-control">
-                                </div>
-                                <button type="button" class="btn btn-default col-sm-2">正解</button>
-                            </div>
-                            <div class="form-group">
-                                <label class="text-primary col-sm-2 control-label">选项C:</label>
-                                <div class="col-sm-6">
-                                    <input id="" name="" type="text" class="form-control">
-                                </div>
-                                <button type="button" class="btn btn-default col-sm-2">正解</button>
-                            </div>
-                            <div class="form-group">
-                                <label class="text-primary col-sm-2 control-label">选项D:</label>
-                                <div class="col-sm-6">
-                                    <input id="" name="" type="text" class="form-control">
-                                </div>
-                                <button type="button" class="btn btn-default col-sm-2">正解</button>
-                            </div>
-                            <div class="form-group">
-                                <label class="text-primary col-sm-2 control-label">正解:</label>
-                                <div class="col-sm-9">
-                                    <input id="" name="" type="text" class="form-control">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="text-primary col-sm-2 control-label">解析:</label>
-                                <div class="col-sm-9">
-                                    <textarea class="form-control" rows="3"></textarea>
-                                </div>
-                            </div>
-                        </form>
+                    <div class="form-group">
+                        <label class="text-primary col-sm-2 control-label">阅读材料:</label>
+                        <div class="col-sm-9">
+                            <textarea class="form-control" rows="9"></textarea>
+                        </div>
                     </div>
-                </div><!-- box-question end -->
+                    <div class="form-group">
+                        <label class="text-primary col-sm-2 control-label">听力材料:</label>
+                        <div class="col-sm-4">
+                            <input id="" name="" type="text" class="form-control" readonly>
+                        </div>
+                        <button type="button" class="btn btn-default col-sm-2">上传</button>
+                        <button type="button" class="btn btn-default col-sm-2">试听</button>
+                    </div>
+                    <hr>
+                    <div class="form-group">
+                        <label class="text-primary col-sm-2 control-label">编号:</label>
+                        <div class="col-sm-9">
+                            <input id="" name="" type="text" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-primary col-sm-2 control-label">题目:</label>
+                        <div class="col-sm-9">
+                            <textarea class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-primary col-sm-2 control-label">选项A:</label>
+                        <div class="col-sm-6">
+                            <input id="" name="" type="text" class="form-control">
+                        </div>
+                        <button type="button" class="btn btn-default col-sm-2">正解</button>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-primary col-sm-2 control-label">选项B:</label>
+                        <div class="col-sm-6">
+                            <input id="" name="" type="text" class="form-control">
+                        </div>
+                        <button type="button" class="btn btn-default col-sm-2">正解</button>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-primary col-sm-2 control-label">选项C:</label>
+                        <div class="col-sm-6">
+                            <input id="" name="" type="text" class="form-control">
+                        </div>
+                        <button type="button" class="btn btn-default col-sm-2">正解</button>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-primary col-sm-2 control-label">选项D:</label>
+                        <div class="col-sm-6">
+                            <input id="" name="" type="text" class="form-control">
+                        </div>
+                        <button type="button" class="btn btn-default col-sm-2">正解</button>
+                    </div>
+                    <hr>
+                    <div class="form-group">
+                        <label class="text-primary col-sm-2 control-label">正解:</label>
+                        <div class="col-sm-9">
+                            <input id="" name="" type="text" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-primary col-sm-2 control-label">解析:</label>
+                        <div class="col-sm-9">
+                            <textarea class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div><!-- box-question end -->
+        </div><!-- modal-body end -->
+
                 <div class="box-question">
                     <button type="button" class="btn btn-info">下一题</button>
                 </div>
@@ -612,11 +630,11 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>level</th>
-                    <th>title</th>
-                    <th>difficulty</th>
-                    <th>uploader</th>
-                    <th>c_date</th>
+                    <th>日语等级</th>
+                    <th>标题</th>
+                    <th>难度</th>
+                    <th>创建者</th>
+                    <th>创建时间</th>
                 </tr>
             </thead>
             <tbody>
