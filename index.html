@@ -16,7 +16,7 @@
             const pre = "https://audio-1256378396.cos.ap-guangzhou.myqcloud.com/"
             var key_size = {}
             var file_ids = new Array();
-            $("table").hide()
+            //$("table").hide()
             $("#btn-all").on("click", function(){
                 $.ajax({
                     url: url,
@@ -273,16 +273,18 @@
             var initTableQuestion = function(t_question){
                 $("table").hide()
                 $("#t_question").show()
-                $("#t_question > tbody tr").remove()
+                //$("#t_question > tbody tr").remove()
                 console.log(t_question)
                 for (let [i,v] of t_question.entries()){
                     var line = i+1
-                    var level = v.level
                     var title = v.title
+                    var description = v.description
+                    var total = v.total
+                    var level = v.level
                     var difficulty = v.difficulty
                     var uploader = v.uploader
                     var c_date = v.c_date
-                    var d_td = `<tr><td>${line}</td><td>${level}</td><td class="pointer prepare">${title}</td><td>${difficulty}</td><td>${uploader}</td><td>${c_date}</td></tr>`
+                    var d_td = `<tr class="pointer prepare"><td>${line}</td><td>${title}</td><td>${description}</td><td>${total}</td><td>${level}</td><td>${difficulty}</td><td>${uploader}</td><td>${c_date}</td></tr>`
                     $("#t_question > tbody").append(d_td)
                 }
 
@@ -291,10 +293,10 @@
                     $("#modal-question").modal("show")
                 })
 
-                $(".pointer").on("mouseover",function(){
+                $(".prepare").on("mouseover",function(){
                     $(this).addClass("bg-info")
                 })
-                $(".pointer").on("mouseout",function(){
+                $(".prepare").on("mouseout",function(){
                     $(this).removeClass("bg-info")
                 })
             }
@@ -322,8 +324,36 @@
             //点击事件
             $("#btn-question").on("click",function(){
                 console.log("btn-question")
-                var t_question = [{"level":"N4","title":"新手测试1","difficulty":"0.9","uploader":"Jono","c_date":"2018-07-08"}]
+                var t_question = [{"title":"新手测试1","description":"准考证x1","total":"60","level":"N4","difficulty":"简单","uploader":"Jono","c_date":"2018-07-08"}]
                 initTableQuestion(t_question)
+            })
+
+            $(".box-que-view").on("mouseover",function(){
+                $(this).find(".glyphicon").show()
+            })
+            $(".box-que-view").on("mouseout",function(){
+                $(this).find(".glyphicon").hide()
+            })
+
+            $(".que-edit").on("click",function(){
+                $(this).css("opacity",0)
+                var $box = $(this).closest(".box-que-view")
+                $box.find(".que-preview").hide(666)
+                $box.find(".que-preview-edit").show(666)
+                $box.find(".que-save").css("opacity",1)
+            })
+
+            $(".que-save").on("click",function(){
+                $(this).css("opacity",0)
+                var $box = $(this).closest(".box-que-view")
+                $box.find(".que-preview-edit").hide(666)
+                $box.find(".que-preview").show(666)
+                $box.find(".que-edit").css("opacity",1)
+            })
+
+            $("#que-add").on("click",function(){
+                var $box = $(this).closest(".box-question")
+                $("#template-que").clone(true).insertBefore($(this))
             })
 
             $("#file").on("change",function(){
@@ -374,7 +404,7 @@
                                 <input id="s-file_id" name="file_id" type="hidden">
                                 <div class="box-content">
                                     <input id="file" name="file" class="up-image pointer" type="file">
-                                    <img class="box-img" src="">
+                                    <img class="box-image" src="">
                                     <div class="box-text">
                                         <p id="src-audio" class="hidden"></p>
                                         <strong><p id="p-title" class="text-primary"></p></strong>
@@ -383,7 +413,7 @@
                                     </div>
                                 </div>
                                     <div id="box-shadow" class="box-shadow">
-                                        <div id="btn-play" class="box-img pointer"></div>
+                                        <div id="btn-play" class="box-image pointer"></div>
                                     </div>
                                     <hr>
                                 <div class="form-group">
@@ -490,83 +520,112 @@
     </div>
             <hr>
             <div class="box-question">
-                <form id="form-que-1" class="form-horizontal" enctype="multipart/form-data">
-
-                    <div class="form-group">
-                        <label class="text-primary col-sm-2 control-label">阅读材料:</label>
-                        <div class="col-sm-9">
-                            <textarea class="form-control" rows="9"></textarea>
-                        </div>
+                <div id="template-que" class="box-que-view">
+                    <div class="que-preview" style="display: none">
+                        <strong class="pull-right menu-que pointer">
+                            <span class="que-edit glyphicon glyphicon-edit" aria-hidden="true" style="display: none"></span>
+                        </strong>
+                        <h4><strong class="text-info mg-right">1.</strong>世界杯的作用是?</h4>
+                        <p><strong class="text-primary mg-right">A.</strong>许愿</p>
+                        <p><strong class="text-primary mg-right">B.</strong>喝酒</p>
+                        <p><strong class="text-primary mg-right">C.</strong>摆饰</p>
+                        <p><strong class="text-primary mg-right">D.</strong>踢</p>
                     </div>
-                    <div class="form-group">
-                        <label class="text-primary col-sm-2 control-label">听力材料:</label>
-                        <div class="col-sm-4">
-                            <input id="" name="" type="text" class="form-control" readonly>
-                        </div>
-                        <button type="button" class="btn btn-default col-sm-2">上传</button>
-                        <button type="button" class="btn btn-default col-sm-2">试听</button>
+                    <div class="que-preview-edit">
+                        <strong class="pull-right menu-que pointer">
+                            <span class="que-delete glyphicon glyphicon-trash" aria-hidden="true" style="display: none"></span>
+                            <span class="que-save glyphicon glyphicon-floppy-save" aria-hidden="true" style="display: none"></span>
+                        </strong>
+                        <form id="form-que-1" class="form-horizontal" enctype="multipart/form-data">
+                            <div id="box-que-article" class="form-group" style="display: none">
+                                <label class="text-primary col-sm-2 control-label">阅读材料:</label>
+                                <div class="col-sm-9">
+                                    <textarea class="form-control" rows="9"></textarea>
+                                </div>
+                            </div>
+                            <div id="box-que-image" class="form-group" style="display: none">
+                                <label class="text-primary col-sm-2 control-label">图片材料:</label>
+                                <div class="col-sm-9">
+                                    <div class="box-content">
+                                        <input id="que-image" name="file" class="up-que-image pointer" type="file">
+                                        <img class="que-image" src="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="box-que-audio" class="form-group" style="display: none">
+                                <label class="text-primary col-sm-2 control-label">听力材料:</label>
+                                <div class="col-sm-4">
+                                    <input id="" name="" type="text" class="form-control" readonly>
+                                </div>
+                                <button type="button" class="btn btn-default col-sm-2">上传</button>
+                                <button type="button" class="btn btn-default col-sm-2">试听</button>
+                            </div>
+                            <div class="form-group">
+                                <label class="text-primary col-sm-1 control-label">
+                                    <strong class="text-info mg-right">1.</strong>
+                                </label>
+                                <div class="col-sm-9">
+                                    <textarea class="form-control" rows="2" placeholder="题目"></textarea>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="text-primary col-sm-1 control-label">
+                                    <strong class="text-info mg-right">A.</strong>
+                                </label>
+                                <div class="col-sm-6">
+                                    <input id="" name="" placeholder="选项A" type="text" class="form-control">
+                                </div>
+                                <button type="button" class="btn btn-default col-sm-2">正解</button>
+                            </div>
+                            <div class="form-group">
+                                <label class="text-primary col-sm-1 control-label">
+                                    <strong class="text-info mg-right">B.</strong>
+                                </label>
+                                <div class="col-sm-6">
+                                    <input id="" name="" placeholder="选项B" type="text" class="form-control">
+                                </div>
+                                <button type="button" class="btn btn-default col-sm-2">正解</button>
+                            </div>
+                            <div class="form-group">
+                                <label class="text-primary col-sm-1 control-label">
+                                    <strong class="text-info mg-right">C.</strong>
+                                </label>
+                                <div class="col-sm-6">
+                                    <input id="" name="" placeholder="选项C" type="text" class="form-control">
+                                </div>
+                                <button type="button" class="btn btn-default col-sm-2">正解</button>
+                            </div>
+                            <div class="form-group">
+                                <label class="text-primary col-sm-1 control-label">
+                                    <strong class="text-info mg-right">D.</strong>
+                                </label>
+                                <div class="col-sm-6">
+                                    <input id="" name="" placeholder="选项D" type="text" class="form-control">
+                                </div>
+                                <button type="button" class="btn btn-default col-sm-2">正解</button>
+                            </div>
+                            <hr>
+                            <div class="form-group">
+                                <label class="text-primary col-sm-2 control-label">正解:</label>
+                                <div class="col-sm-9">
+                                    <input id="" name="" type="text" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="text-primary col-sm-2 control-label">解析:</label>
+                                <div class="col-sm-9">
+                                    <textarea class="form-control" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                    <hr>
-                    <div class="form-group">
-                        <label class="text-primary col-sm-2 control-label">编号:</label>
-                        <div class="col-sm-9">
-                            <input id="" name="" type="text" class="form-control">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="text-primary col-sm-2 control-label">题目:</label>
-                        <div class="col-sm-9">
-                            <textarea class="form-control" rows="3"></textarea>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="text-primary col-sm-2 control-label">选项A:</label>
-                        <div class="col-sm-6">
-                            <input id="" name="" type="text" class="form-control">
-                        </div>
-                        <button type="button" class="btn btn-default col-sm-2">正解</button>
-                    </div>
-                    <div class="form-group">
-                        <label class="text-primary col-sm-2 control-label">选项B:</label>
-                        <div class="col-sm-6">
-                            <input id="" name="" type="text" class="form-control">
-                        </div>
-                        <button type="button" class="btn btn-default col-sm-2">正解</button>
-                    </div>
-                    <div class="form-group">
-                        <label class="text-primary col-sm-2 control-label">选项C:</label>
-                        <div class="col-sm-6">
-                            <input id="" name="" type="text" class="form-control">
-                        </div>
-                        <button type="button" class="btn btn-default col-sm-2">正解</button>
-                    </div>
-                    <div class="form-group">
-                        <label class="text-primary col-sm-2 control-label">选项D:</label>
-                        <div class="col-sm-6">
-                            <input id="" name="" type="text" class="form-control">
-                        </div>
-                        <button type="button" class="btn btn-default col-sm-2">正解</button>
-                    </div>
-                    <hr>
-                    <div class="form-group">
-                        <label class="text-primary col-sm-2 control-label">正解:</label>
-                        <div class="col-sm-9">
-                            <input id="" name="" type="text" class="form-control">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="text-primary col-sm-2 control-label">解析:</label>
-                        <div class="col-sm-9">
-                            <textarea class="form-control" rows="3"></textarea>
-                        </div>
-                    </div>
-                </form>
-            </div><!-- box-question end -->
-        </div><!-- modal-body end -->
-
-                <div class="box-question">
-                    <button type="button" class="btn btn-info">下一题</button>
                 </div>
+                <div id="que-add" class="box-que-add pointer prepare text-primary">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                </div>
+            </div><!-- box-question end -->
+          
+        </div><!-- modal-body end -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                     <button id="btn-save" type="button" class="btn btn-primary">保存</button>
@@ -590,7 +649,7 @@
     </div>
     <hr>
     <div class="">
-        <table id="t_audio" class="table table-bordered table-striped table-hover">
+        <table id="t_audio" class="table table-bordered table-striped table-hover" style="display: none">
             <thead>
                 <tr>
                     <th>#</th>
@@ -609,7 +668,7 @@
             </tbody>
         </table>
 
-        <table id="t_content" class="table table-bordered table-striped table-hover">
+        <table id="t_content" class="table table-bordered table-striped table-hover" style="display: none">
             <thead>
                 <tr>
                     <th>#</th>
@@ -626,12 +685,14 @@
             </tbody>
         </table>
 
-        <table id="t_question" class="table table-bordered table-striped table-hover">
+        <table id="t_question" class="table table-bordered" style="display: none">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>日语等级</th>
                     <th>标题</th>
+                    <th>备注</th>
+                    <th>题目数</th>
+                    <th>日语等级</th>
                     <th>难度</th>
                     <th>创建者</th>
                     <th>创建时间</th>
@@ -639,6 +700,11 @@
             </thead>
             <tbody>
             </tbody>
+            <tfoot>
+                <tr><td colspan="8" class="text-center prepare pointer text-primary">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                </td></tr>
+            </tfoot>
         </table>
     </div>
 

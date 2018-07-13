@@ -3,6 +3,7 @@
 body{
     margin: 10px auto;
     width:96%;
+    text-align: center;
 }
 
 .pointer{
@@ -25,12 +26,31 @@ body{
     padding: 5px 5px;
 }
 
-.box-img{
+.mg-right{
+    margin-right: 10px;
+}
+
+.box-image{
     border:1px solid #bbb;
     margin-right: 5px;
     height: 100px;
     width: 100px;
     border-radius: 5px;
+}
+
+.que-image{
+    border:1px solid #bbb;
+    margin-right: 5px;
+    height: 222px;
+    width: 100%;
+    border-radius: 5px;
+}
+
+.up-que-image{
+    width:100%;
+    height:222px;
+    opacity: 0;
+    position: absolute;
 }
 
 .up-image{
@@ -54,13 +74,41 @@ body{
     width: 100%;
 }
 
+.box-que-view{
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-left-width: 3px;
+    border-radius: 5px;
+}
+
+.box-que-add{
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.6em;
+}
+
 .box-question{
     border: 1px solid #5bc0de;
     padding: 20px 10px;
     margin: 20px;
     border-radius: 5px;
-    text-align: center;
 }
+
+.que-delete{
+    color: #c12e2a;
+    margin-right: 20px;
+}
+
+.menu-que{
+    font-weight: bold;
+    font-size: 1.6em;
+}
+
 .go-level{
     width: 16%;
     margin-right: 46px;
@@ -79,60 +127,9 @@ body{
     padding: 5px 5px;
 }
 
-.k10{
-    height: 10px;
-}
-.k20{
-    height: 20px;
-}
-.k30{
-    height: 30px;
-}
-.k40{
-    height: 40px;
-}
-.k50{
-    height: 50px;
-}
-
 .ele {
     flex-shrink: 1;
     width: 6px;
     background-color: #bbb;
     box-shadow: 0px 0px 1px 1px #fff;
-}
-
-.pt{
-    cursor: pointer;
-    width: 99%;
-    height: 50px;
-    transform: scale(1,1);
-    background: #666;
-    transition: transform 0.6s ease-in;
-    will-change: transform;
-}
-
-.pt-on{
-    width: 99%;
-    height: 50px;
-    transform: scale(0.1,1);
-    background: #666;
-    transition: transform 0.6s ease-out;
-    will-change: transform;
-}
-
-.pt-text{
-    color: rebeccapurple;
-    font-weight: bold;
-    animation: an-spin 30s linear infinite;
-    will-change: transform;
-}
-
-.btn-box{
-    margin: 10px auto;
-    padding: 10px auto;
-    height: 60px;
-    margin-bottom: 10px;
-    display:flex;
-    align-items: center;
 }
