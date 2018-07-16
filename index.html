@@ -288,9 +288,9 @@
                     $("#t_question > tbody").append(d_td)
                 }
 
-                $("#t_question .prepare").click(function(){
+                $("#t_question > tbody > .prepare").click(function(){
                     console.log("prepare_click")
-                    $("#modal-question").modal("show")
+                    $("#modal-paper").modal("show")
                 })
 
                 $(".prepare").on("mouseover",function(){
@@ -299,6 +299,28 @@
                 $(".prepare").on("mouseout",function(){
                     $(this).removeClass("bg-info")
                 })
+            }
+
+            $("#paper-add").click(function(){
+                console.log("prepare_click")
+                var t_paper = [{"title":"新手测试1","description":"准考证x1","total":"60","level":"N4","difficulty":"简单","uploader":"Jono","c_date":"2018-07-08"}]
+                initModalPaper([])
+                $("#modal-paper").modal("show")
+            })
+
+            var initModalPaper = function(t_paper){
+                console.log(t_paper)
+                if (t_paper.length == 1){
+                    paper = t_paper[0]
+                    $("#paper-title").val(paper.title)
+                    $("#paper-description").val(paper.description)
+                    $('#paper-level > option[value="N4"]').attr("selected", true)
+                    $("#level-easy").trigger("click")
+                }else{
+                    console.log("noo")
+                    
+                    
+                }
             }
 
             var initTable = function(t_audio){
@@ -328,10 +350,10 @@
                 initTableQuestion(t_question)
             })
 
-            $(".box-que-view").on("mouseover",function(){
+            $(".box-que-view,.box-question-title").on("mouseover",function(){
                 $(this).find(".glyphicon").show()
             })
-            $(".box-que-view").on("mouseout",function(){
+            $(".box-que-view,.box-question-title").on("mouseout",function(){
                 $(this).find(".glyphicon").hide()
             })
 
@@ -341,6 +363,10 @@
                 $box.find(".que-preview").hide(666)
                 $box.find(".que-preview-edit").show(666)
                 $box.find(".que-save").css("opacity",1)
+                var edit = $("#box-question").data("edit")
+                edit = edit + 1
+                $("#box-question").data("edit", edit)
+                $("#que-add").hide()
             })
 
             $(".que-save").on("click",function(){
@@ -349,11 +375,55 @@
                 $box.find(".que-preview-edit").hide(666)
                 $box.find(".que-preview").show(666)
                 $box.find(".que-edit").css("opacity",1)
+                var edit = $("#box-question").data("edit")
+                edit = edit - 1
+                $("#box-question").data("edit", edit)
+                if (edit == 0) $("#que-add").show(666)
             })
 
             $("#que-add").on("click",function(){
+                var que_num = $(this).data("num")
+                var que_type = $(this).data("type")
+                que_num += 1
+                console.log(que_num)
                 var $box = $(this).closest(".box-question")
-                $("#template-que").clone(true).insertBefore($(this))
+                var $template = $("#template-que").clone(true)
+                //console.log($template.attr("id"))
+                $template.removeAttr("id")
+                $template.find(".que-id").text(que_num)
+                $(this).data("num", que_num)
+                var edit = $("#box-question").data("edit")
+                edit = edit + 1
+                $("#box-question").data("edit", edit)
+                //console.log($template.attr("id"))
+                $template.insertBefore($(this))
+                $(this).hide()
+                $template.show(233)
+            })
+
+            $(".paper-save").on("click",function(){
+                $("#paper-bar").css("width", "100%")
+                $("#paper-menu").show(666)
+            })
+
+            $(".paper-delete").on("click",function(){
+                $("#paper-bar").css("width", "0%")
+                $("#paper-menu").hide()
+            })
+
+            $("#paper-preview,#paper-type1,#paper-type2,#paper-type3,#paper-type4").on("click",function(){
+                var que_num = $(this).data("num")
+                var que_type = $(this).data("type")
+                $("#que-add").data("num", que_num)
+                $("#que-add").data("type", que_type)
+                if (que_type == 1){
+                    $("#box-que-bar").show(233)
+                    $("#box-question").show(233)
+                }else{
+                    $("#box-que-bar").hide()
+                    $("#box-question").hide()
+                }
+
             })
 
             $("#file").on("change",function(){
@@ -452,7 +522,7 @@
     </div>
 <!-- modal end -->
 
-<div id="modal-question" class="modal fade bs-example-modal-lg" aria-hidden="true" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="to_list">
+<div id="modal-paper" class="modal fade bs-example-modal-lg" aria-hidden="true" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="to_list">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
                 <div class="modal-header">
@@ -463,35 +533,39 @@
                         <form id="form-que-title" class="form-horizontal" enctype="multipart/form-data">
                             <div class="box-content">
                                 <div class="box-question-title">
+                                    <strong class="pull-right menu-que pointer">
+                                        <span class="paper-delete glyphicon glyphicon-trash" aria-hidden="true" style="display: none"></span>
+                                        <span class="paper-save glyphicon glyphicon-floppy-save" aria-hidden="true" style="display: none"></span>
+                                    </strong>
                                     <div class="form-group">
-                                        <label class="text-primary col-sm-2 control-label">标题:</label>
+                                        <label class="text-primary col-sm-1 control-label">标题:</label>
                                         <div class="col-sm-9">
-                                            <input id="" name="" type="text" class="form-control">
+                                            <input id="paper-title" name="title" type="text" class="form-control">
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="text-primary col-sm-2 control-label">备注:</label>
+                                        <label class="text-primary col-sm-1 control-label">备注:</label>
                                         <div class="col-sm-4">
-                                            <input id="" name="" type="text" class="form-control">
+                                            <input id="paper-description" name="description" type="text" class="form-control">
                                         </div>
 
-                                        <select class="form-control col-sm-3 go-level">
+                                        <select id="paper-level" class="form-control col-sm-3 paper-level">
                                                 <option>--等级难度--</option>
-                                                <option>N2</option>
-                                                <option>N3</option>
-                                                <option>N4</option>
-                                                <option>N5</option>
+                                                <option value="N2">N2</option>
+                                                <option value="N3">N3</option>
+                                                <option value="N4">N4</option>
+                                                <option value="N5">N5</option>
                                         </select>
 
                                         <div class="btn-group" data-toggle="buttons">
-                                            <label class="btn btn-default">
-                                                <input type="radio" name="options" id="op-easy" autocomplete="off">容易
+                                            <label id="level-easy" class="btn btn-default">
+                                                <input type="radio" name="options" id="op-easy" autocomplete="off">简单
                                             </label>
-                                            <label class="btn btn-default active">
+                                            <label id="level-normal" class="btn btn-default active">
                                                 <input type="radio" name="options" id="op-normal" autocomplete="off" checked>正常
                                             </label>
-                                            <label class="btn btn-default">
-                                                <input type="radio" name="options" id="op-diff" autocomplete="off">困难
+                                            <label id="level-hard" class="btn btn-default">
+                                                <input type="radio" name="options" id="op-hard" autocomplete="off">困难
                                             </label>
                                         </div>
 
@@ -500,27 +574,37 @@
                                 </div>
                             </div>
                         </form>
-                        <hr>
+<div class="progress" style="height: 1px;">
+    <div id="paper-bar" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <span class="sr-only">100%</span>
+    </div>
+</div>
+<div id="paper-menu" class="text-center" style="display: none;margin-bottom: 20px;">
     <div class="btn-group" data-toggle="buttons">
-        <label class="btn btn-default">
-            <input type="radio" name="options" id="option1" autocomplete="off">试卷预览
+        <label id="paper-preview" data-type="0" data-num="0" class="btn btn-default">
+            <input type="radio" name="options" autocomplete="off">试卷预览
         </label>
-        <label class="btn btn-default active">
-            <input type="radio" name="options" id="option2" autocomplete="off" checked>选择题
+        <label id="paper-type1" data-type="1" data-num="0" class="btn btn-default">
+            <input type="radio" name="options" autocomplete="off">选择题
         </label>
-        <label class="btn btn-default">
-            <input type="radio" name="options" id="option3" autocomplete="off">阅读题
+        <label id="paper-type2" data-type="2" data-num="0" class="btn btn-default">
+            <input type="radio" name="options" autocomplete="off">阅读题
         </label>
-        <label class="btn btn-default">
-            <input type="radio" name="options" id="option4" autocomplete="off">听解题(I)
+        <label id="paper-type3" data-type="3" data-num="0" class="btn btn-default">
+            <input type="radio" name="options" autocomplete="off">听解题(I)
         </label>
-        <label class="btn btn-default">
-            <input type="radio" name="options" id="option4" autocomplete="off">听解题(II)
+        <label id="paper-type4" data-type="4" data-num="0" class="btn btn-default">
+            <input type="radio" name="options" autocomplete="off">听解题(II)
         </label>
     </div>
-            <hr>
-            <div class="box-question">
-                <div id="template-que" class="box-que-view">
+</div>
+<div id="box-que-bar" class="progress" style="display: none;height: 1px;">
+    <div id="que-bar" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <span class="sr-only">100%</span>
+    </div>
+</div>
+            <div id="box-question" class="box-question" data-edit="0" style="display: none">
+                <div id="template-que" class="box-que-view" style="display: none">
                     <div class="que-preview" style="display: none">
                         <strong class="pull-right menu-que pointer">
                             <span class="que-edit glyphicon glyphicon-edit" aria-hidden="true" style="display: none"></span>
@@ -533,7 +617,6 @@
                     </div>
                     <div class="que-preview-edit">
                         <strong class="pull-right menu-que pointer">
-                            <span class="que-delete glyphicon glyphicon-trash" aria-hidden="true" style="display: none"></span>
                             <span class="que-save glyphicon glyphicon-floppy-save" aria-hidden="true" style="display: none"></span>
                         </strong>
                         <form id="form-que-1" class="form-horizontal" enctype="multipart/form-data">
@@ -562,7 +645,7 @@
                             </div>
                             <div class="form-group">
                                 <label class="text-primary col-sm-1 control-label">
-                                    <strong class="text-info mg-right">1.</strong>
+                                    <strong class="que-id text-info mg-right">1</strong>
                                 </label>
                                 <div class="col-sm-9">
                                     <textarea class="form-control" rows="2" placeholder="题目"></textarea>
@@ -604,6 +687,9 @@
                                 </div>
                                 <button type="button" class="btn btn-default col-sm-2">正解</button>
                             </div>
+                            <strong class="pull-right menu-que pointer">
+                                <span class="que-delete glyphicon glyphicon-trash" aria-hidden="true" style="display: none"></span>
+                            </strong>
                             <hr>
                             <div class="form-group">
                                 <label class="text-primary col-sm-2 control-label">正解:</label>
@@ -636,16 +722,18 @@
 <!-- modal end -->
 
     <hr>
-    <div class="btn-group" data-toggle="buttons">
-        <label class="btn btn-default active">
-            <input type="radio" name="options" autocomplete="off" checked>全部
-        </label>
-        <label id='btn-all' class="btn btn-default">
-            <input type="radio" name="options" autocomplete="off">待发布
-        </label>
-        <label id="btn-question" class="btn btn-default">
-            <input type="radio" name="options" autocomplete="off">呱呱
-        </label>
+    <div class="text-center">
+        <div class="btn-group" data-toggle="buttons">
+            <label class="btn btn-default active">
+                <input type="radio" name="options" autocomplete="off" checked>已发布式神
+            </label>
+            <label id='btn-all' class="btn btn-default">
+                <input type="radio" name="options" autocomplete="off">待发布式神
+            </label>
+            <label id="btn-question" class="btn btn-default">
+                <input type="radio" name="options" autocomplete="off">试卷
+            </label>
+        </div>
     </div>
     <hr>
     <div class="">
@@ -701,7 +789,7 @@
             <tbody>
             </tbody>
             <tfoot>
-                <tr><td colspan="8" class="text-center prepare pointer text-primary">
+                <tr id="paper-add" ><td colspan="8" class="text-center prepare pointer text-primary">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                 </td></tr>
             </tfoot>

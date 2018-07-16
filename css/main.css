@@ -3,7 +3,6 @@
 body{
     margin: 10px auto;
     width:96%;
-    text-align: center;
 }
 
 .pointer{
@@ -101,6 +100,11 @@ body{
 
 .que-delete{
     color: #c12e2a;
+    position: relative;
+    top:-20px;
+}
+.paper-delete{
+    color: #c12e2a;
     margin-right: 20px;
 }
 
@@ -109,7 +113,7 @@ body{
     font-size: 1.6em;
 }
 
-.go-level{
+.paper-level{
     width: 16%;
     margin-right: 46px;
 }
