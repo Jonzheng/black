@@ -29,6 +29,11 @@ body{
     margin-right: 10px;
 }
 
+.top-auth{
+    width: 300px;
+    margin-top: 10px;
+}
+
 .box-image{
     border:1px solid #bbb;
     margin-right: 5px;

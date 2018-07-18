@@ -14,9 +14,61 @@
             const urls = 'https://418980938.omoz.club/weapp/queryAudio'
             const publishUrls = 'https://418980938.omoz.club/weapp/publishAudio'
             const pre = "https://audio-1256378396.cos.ap-guangzhou.myqcloud.com/"
+
+            const save_paper = 'https://06mdkod2.qcloud.la/weapp/savePaper'
+            const save_question = 'https://06mdkod2.qcloud.la/weapp/saveQuestion'
+            const query_paper = 'https://06mdkod2.qcloud.la/weapp/queryPaper'
+            const query_question = 'https://06mdkod2.qcloud.la/weapp/queryQuestion'
+            const black_login = 'https://06mdkod2.qcloud.la/weapp/blackLogin'
+
             var key_size = {}
             var file_ids = new Array();
-            //$("table").hide()
+            var __auth_name = ""
+            var __openid = "ocVQY4-dF2m4IiYTTJZFo6k-NZbE"
+            if(__openid == ""){
+                $("#top-menu").hide()
+            }else{
+                $("#top-login").hide()
+                $("#top-menu").show(233)
+            }
+
+            $("#auth-btn").on("click", function(){
+                var $auth_name =  $("#auth-name")
+                var $auth_code =  $("#auth-code")
+                var auth_name =$auth_name.val().trim()
+                var auth_code = $auth_code.val().trim()
+                if(auth_name == ""){
+                    $auth_name.focus()
+                    return
+                }
+                if(auth_code == ""){
+                    $auth_code.focus()
+                    return
+                }
+                $.ajax({
+                    type: "post",
+                    crossDomain: true,
+                    url: black_login,
+                    data: {auth_name, auth_code},
+                    success: function(data){
+                        var user_lst = data.data
+                        if (user_lst.length == 1){
+                            user = user_lst[0]
+                            console.log(user)
+                            __auth_name = user.auth_name
+                            __openid = user.openid
+                            $auth_code.attr("placeholder","密码")
+                            $("#top-login").hide()
+                            $("#top-menu").show(233)
+                        }else{
+                            $auth_code.val("")
+                            $auth_code.focus()
+                            $auth_code.attr("placeholder","密码 / 用户名错误")
+                        }
+                    }
+                })
+            })
+
             $("#btn-all").on("click", function(){
                 $.ajax({
                     url: url,
@@ -270,27 +322,37 @@
                 })
             }
 
-            var initTableQuestion = function(t_question){
+            var initTablePaper = function(t_paper){
                 $("table").hide()
-                $("#t_question").show()
-                //$("#t_question > tbody tr").remove()
-                console.log(t_question)
-                for (let [i,v] of t_question.entries()){
+                $("#t_paper").show()
+                $("#t_paper > tbody tr").remove()
+                console.log(t_paper)
+                var map_paper = {}
+                for (let [i,v] of t_paper.entries()){
                     var line = i+1
+                    var paper_id = v.paper_id
+                    map_paper[paper_id] = v
                     var title = v.title
                     var description = v.description
                     var total = v.total
                     var level = v.level
                     var difficulty = v.difficulty
-                    var uploader = v.uploader
-                    var c_date = v.c_date
-                    var d_td = `<tr class="pointer prepare"><td>${line}</td><td>${title}</td><td>${description}</td><td>${total}</td><td>${level}</td><td>${difficulty}</td><td>${uploader}</td><td>${c_date}</td></tr>`
-                    $("#t_question > tbody").append(d_td)
+                    var uploader = "somebody"
+                    var _prepare = ""
+                    if (v.uploader == __openid){
+                        uploader = __auth_name
+                        _prepare = "prepare"
+                    }
+                    var c_date = v.c_date.substr(0,10)
+                    var d_td = `<tr class="pointer ${_prepare}" data-paper_id=${paper_id}><td>${line}</td><td>${title}</td><td>${description}</td><td>${total}</td><td>${level}</td><td>${difficulty}</td><td>${uploader}</td><td>${c_date}</td></tr>`
+                    $("#t_paper > tbody").append(d_td)
                 }
 
-                $("#t_question > tbody > .prepare").click(function(){
-                    console.log("prepare_click")
-                    $("#modal-paper").modal("show")
+                $("#t_paper > tbody > .prepare").click(function(){
+                    console.log("tr__prepare_click")
+                    var paper_id = $(this).closest("tr").data("paper_id")
+                    var paper = map_paper[paper_id]
+                    initModalPaper(paper)
                 })
 
                 $(".prepare").on("mouseover",function(){
@@ -302,25 +364,30 @@
             }
 
             $("#paper-add").click(function(){
-                console.log("prepare_click")
-                var t_paper = [{"title":"新手测试1","description":"准考证x1","total":"60","level":"N4","difficulty":"简单","uploader":"Jono","c_date":"2018-07-08"}]
+                console.log("paper__add")
                 initModalPaper([])
-                $("#modal-paper").modal("show")
             })
 
-            var initModalPaper = function(t_paper){
-                console.log(t_paper)
-                if (t_paper.length == 1){
-                    paper = t_paper[0]
+            var initModalPaper = function(paper){
+                console.log(paper)
+                $('#paper-level > option[selected]').removeAttr("selected")
+                if (paper){
+                    $("#paper-title").data("paper_id", paper.paper_id)
                     $("#paper-title").val(paper.title)
                     $("#paper-description").val(paper.description)
-                    $('#paper-level > option[value="N4"]').attr("selected", true)
-                    $("#level-easy").trigger("click")
+                    var tar_level = '#paper-level > option[value="'+paper.level+'"]'
+                    $(tar_level).attr("selected", true)
+                    var tar_diff = "#paper-"+paper.difficulty
+                    $(tar_diff).trigger("click")
                 }else{
-                    console.log("noo")
-                    
-                    
+                    var paper_id = new Date().getTime()
+                    $("#paper-title").data("paper_id", paper_id)
+                    $("#paper-title").val("")
+                    $("#paper-description").val("")
+                    $("#level-default").attr("selected", true)
+                    $("#paper-normal").trigger("click")
                 }
+                $("#modal-paper").modal("show")
             }
 
             var initTable = function(t_audio){
@@ -346,8 +413,15 @@
             //点击事件
             $("#btn-question").on("click",function(){
                 console.log("btn-question")
-                var t_question = [{"title":"新手测试1","description":"准考证x1","total":"60","level":"N4","difficulty":"简单","uploader":"Jono","c_date":"2018-07-08"}]
-                initTableQuestion(t_question)
+                $.ajax({
+                    type: "post",
+                    crossDomain: true,
+                    url: query_paper,
+                    success: function(data){
+                        var t_paper = data.data
+                        initTablePaper(t_paper)
+                    }
+                })
             })
 
             $(".box-que-view,.box-question-title").on("mouseover",function(){
@@ -401,9 +475,36 @@
                 $template.show(233)
             })
 
+            var savePaper = function(t_paper){
+                console.log(t_paper)
+                $.ajax({
+                    type: "post",
+                    crossDomain: true,
+                    url: save_paper,
+                    data: t_paper,
+                    success: function(data){
+                        console.log(data)
+                        $("#paper-bar").css("width", "100%")
+                        $("#paper-menu").show(666)
+                    }
+                })
+            }
+
             $(".paper-save").on("click",function(){
-                $("#paper-bar").css("width", "100%")
-                $("#paper-menu").show(666)
+                var $title = $("#paper-title")
+                var title = $title.val().trim()
+                var description = $("#paper-description").val().trim()
+                var level = $("#paper-level").val()
+                var difficulty = $("#paper-difficulty").find('label[class="btn btn-default active"] > input').val()
+
+                if (title == ""){
+                    $title.focus()
+                    return
+                }
+                var paper_id = $title.data("paper_id")
+                var uploader = __openid
+                var t_paper = {paper_id,title,description,level,difficulty,uploader}
+                savePaper(t_paper)
             })
 
             $(".paper-delete").on("click",function(){
@@ -550,22 +651,22 @@
                                         </div>
 
                                         <select id="paper-level" class="form-control col-sm-3 paper-level">
-                                                <option>--等级难度--</option>
+                                                <option value="N4">--等级难度--</option>
                                                 <option value="N2">N2</option>
                                                 <option value="N3">N3</option>
-                                                <option value="N4">N4</option>
+                                                <option id="level-default" value="N4">N4</option>
                                                 <option value="N5">N5</option>
                                         </select>
 
-                                        <div class="btn-group" data-toggle="buttons">
-                                            <label id="level-easy" class="btn btn-default">
-                                                <input type="radio" name="options" id="op-easy" autocomplete="off">简单
+                                        <div id="paper-difficulty" class="btn-group" data-toggle="buttons">
+                                            <label id="paper-easy" class="btn btn-default">
+                                                <input type="radio" value="easy" name="options" autocomplete="off">简单
                                             </label>
-                                            <label id="level-normal" class="btn btn-default active">
-                                                <input type="radio" name="options" id="op-normal" autocomplete="off" checked>正常
+                                            <label id="paper-normal" class="btn btn-default active">
+                                                <input type="radio" value="normal" name="options" autocomplete="off">正常
                                             </label>
-                                            <label id="level-hard" class="btn btn-default">
-                                                <input type="radio" name="options" id="op-hard" autocomplete="off">困难
+                                            <label id="paper-hard" class="btn btn-default">
+                                                <input type="radio" value="hard" name="options" autocomplete="off">困难
                                             </label>
                                         </div>
 
@@ -723,7 +824,16 @@
 
     <hr>
     <div class="text-center">
-        <div class="btn-group" data-toggle="buttons">
+
+        <div id="top-login" style="width: 20%; margin: 0 auto">
+            <input id="auth-name" placeholder="用户名 / 成员编号" type="text" class="form-control top-auth">
+            <input id="auth-code" placeholder="密码" type="password" class="form-control top-auth">
+            <div class="btn-group" role="group" aria-label="...">
+                <button id="auth-btn" type="button" class="btn btn-info top-auth">登录</button>
+            </div>
+        </div>
+                
+        <div id="top-menu" class="btn-group" data-toggle="buttons" style="display: none">
             <label class="btn btn-default active">
                 <input type="radio" name="options" autocomplete="off" checked>已发布式神
             </label>
@@ -773,7 +883,7 @@
             </tbody>
         </table>
 
-        <table id="t_question" class="table table-bordered" style="display: none">
+        <table id="t_paper" class="table table-bordered" style="display: none">
             <thead>
                 <tr>
                     <th>#</th>
