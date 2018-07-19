@@ -446,13 +446,37 @@
             $(".que-save").on("click",function(){
                 $(this).css("opacity",0)
                 var $box = $(this).closest(".box-que-view")
-                $box.find(".que-preview-edit").hide(666)
-                $box.find(".que-preview").show(666)
-                $box.find(".que-edit").css("opacity",1)
-                var edit = $("#box-question").data("edit")
-                edit = edit - 1
-                $("#box-question").data("edit", edit)
-                if (edit == 0) $("#que-add").show(666)
+                var formData = new FormData($box.find("form")[0]);
+                $.ajax({
+                    type: "post",
+                    crossDomain: true,
+                    url: save_question,
+                    data: formData,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function(data){
+                        console.log(data)
+                        $box.find(".que-preview-edit").hide(666)
+                        $box.find(".que-preview").show(666)
+                        $box.find(".que-edit").css("opacity",1)
+                        var edit = $("#box-question").data("edit")
+                        edit = edit - 1
+                        $("#box-question").data("edit", edit)
+                        if (edit == 0) $("#que-add").show(666)
+                    }
+                })
+            })
+
+            $(".right_option").on("click",function(){
+                var $box = $(this).closest(".que-preview-edit")
+                var option = $(this).data("option")
+                console.log(option)
+                $box.find(".right_option").each(function(){
+                    $(this).removeClass("active")
+                })
+                $(this).addClass("active")
+                $box.find("#que-right_option").val(option)
             })
 
             $("#que-add").on("click",function(){
@@ -517,6 +541,7 @@
                 var que_type = $(this).data("type")
                 $("#que-add").data("num", que_num)
                 $("#que-add").data("type", que_type)
+                $("#que-type").val(que_type)
                 if (que_type == 1){
                     $("#box-que-bar").show(233)
                     $("#box-question").show(233)
@@ -651,11 +676,11 @@
                                         </div>
 
                                         <select id="paper-level" class="form-control col-sm-3 paper-level">
-                                                <option value="N4">--等级难度--</option>
-                                                <option value="N2">N2</option>
-                                                <option value="N3">N3</option>
-                                                <option id="level-default" value="N4">N4</option>
-                                                <option value="N5">N5</option>
+                                            <option value="N4">--等级难度--</option>
+                                            <option value="N2">N2</option>
+                                            <option value="N3">N3</option>
+                                            <option id="level-default" value="N4">N4</option>
+                                            <option value="N5">N5</option>
                                         </select>
 
                                         <div id="paper-difficulty" class="btn-group" data-toggle="buttons">
@@ -720,11 +745,12 @@
                         <strong class="pull-right menu-que pointer">
                             <span class="que-save glyphicon glyphicon-floppy-save" aria-hidden="true" style="display: none"></span>
                         </strong>
-                        <form id="form-que-1" class="form-horizontal" enctype="multipart/form-data">
+                        <form class="form-horizontal" enctype="multipart/form-data">
+                            <input name="type" type="hidden" value="1">
                             <div id="box-que-article" class="form-group" style="display: none">
                                 <label class="text-primary col-sm-2 control-label">阅读材料:</label>
                                 <div class="col-sm-9">
-                                    <textarea class="form-control" rows="9"></textarea>
+                                    <textarea name="article" class="form-control" rows="9"></textarea>
                                 </div>
                             </div>
                             <div id="box-que-image" class="form-group" style="display: none">
@@ -749,7 +775,7 @@
                                     <strong class="que-id text-info mg-right">1</strong>
                                 </label>
                                 <div class="col-sm-9">
-                                    <textarea class="form-control" rows="2" placeholder="题目"></textarea>
+                                    <textarea id="que-title" name="title" class="form-control" rows="2" placeholder="题目"></textarea>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -757,36 +783,36 @@
                                     <strong class="text-info mg-right">A.</strong>
                                 </label>
                                 <div class="col-sm-6">
-                                    <input id="" name="" placeholder="选项A" type="text" class="form-control">
+                                    <input id="que-option_a" name="option_a" placeholder="选项A" type="text" class="form-control">
                                 </div>
-                                <button type="button" class="btn btn-default col-sm-2">正解</button>
+                                <button type="button" data-option="A" class="right_option btn btn-default col-sm-2">正解</button>
                             </div>
                             <div class="form-group">
                                 <label class="text-primary col-sm-1 control-label">
                                     <strong class="text-info mg-right">B.</strong>
                                 </label>
                                 <div class="col-sm-6">
-                                    <input id="" name="" placeholder="选项B" type="text" class="form-control">
+                                    <input id="que-option_b" name="option_b" placeholder="选项B" type="text" class="form-control">
                                 </div>
-                                <button type="button" class="btn btn-default col-sm-2">正解</button>
+                                <button type="button" data-option="B" class="right_option btn btn-default col-sm-2">正解</button>
                             </div>
                             <div class="form-group">
                                 <label class="text-primary col-sm-1 control-label">
                                     <strong class="text-info mg-right">C.</strong>
                                 </label>
                                 <div class="col-sm-6">
-                                    <input id="" name="" placeholder="选项C" type="text" class="form-control">
+                                    <input id="que-option_c" name="option_c" placeholder="选项C" type="text" class="form-control">
                                 </div>
-                                <button type="button" class="btn btn-default col-sm-2">正解</button>
+                                <button type="button" data-option="C" class="right_option btn btn-default col-sm-2">正解</button>
                             </div>
                             <div class="form-group">
                                 <label class="text-primary col-sm-1 control-label">
                                     <strong class="text-info mg-right">D.</strong>
                                 </label>
                                 <div class="col-sm-6">
-                                    <input id="" name="" placeholder="选项D" type="text" class="form-control">
+                                    <input id="que-option_d" name="option_d" placeholder="选项D" type="text" class="form-control">
                                 </div>
-                                <button type="button" class="btn btn-default col-sm-2">正解</button>
+                                <button type="button" data-option="D" class="right_option btn btn-default col-sm-2">正解</button>
                             </div>
                             <strong class="pull-right menu-que pointer">
                                 <span class="que-delete glyphicon glyphicon-trash" aria-hidden="true" style="display: none"></span>
@@ -795,13 +821,13 @@
                             <div class="form-group">
                                 <label class="text-primary col-sm-2 control-label">正解:</label>
                                 <div class="col-sm-9">
-                                    <input id="" name="" type="text" class="form-control">
+                                    <input id="que-right_option" name="right_option" type="text" class="form-control">
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="text-primary col-sm-2 control-label">解析:</label>
                                 <div class="col-sm-9">
-                                    <textarea class="form-control" rows="3"></textarea>
+                                    <textarea id="que-an_explain" name="an_explain" class="form-control" rows="3"></textarea>
                                 </div>
                             </div>
                         </form>
