@@ -410,7 +410,14 @@
                 }
             }
 
-            //点击事件
+            var initModalQuestion = function(t_question){
+                console.log("init_question")
+                for (let v of t_question){
+                    
+                }
+            }
+
+            //查询试卷
             $("#btn-question").on("click",function(){
                 console.log("btn-question")
                 $.ajax({
@@ -423,6 +430,20 @@
                     }
                 })
             })
+
+            //查询试题:paper_id
+            var loadQuestion = function(paper_id){
+                $.ajax({
+                    type: "post",
+                    crossDomain: true,
+                    url: query_question,
+                    data: paper_id,
+                    success: function(data){
+                        var t_question = data.data
+                        initModalQuestion(t_question)
+                    }
+                })
+            }
 
             $(".box-que-view,.box-question-title").on("mouseover",function(){
                 $(this).find(".glyphicon").show()
@@ -443,6 +464,28 @@
                 $("#que-add").hide()
             })
 
+            var initPreview = function($box){
+                var title = $box.find(".que-title").val().trim()
+                var option_a = $box.find(".que-option_a").val().trim()
+                var option_b = $box.find(".que-option_b").val().trim()
+                var option_c = $box.find(".que-option_c").val().trim()
+                var option_d = $box.find(".que-option_d").val().trim()
+
+                $box.find(".preview-title").text(title)
+                $box.find(".preview-option_a").text(option_a)
+                $box.find(".preview-option_b").text(option_b)
+                $box.find(".preview-option_c").text(option_c)
+                $box.find(".preview-option_d").text(option_d)
+
+                $box.find(".que-preview-edit").hide(666)
+                $box.find(".que-preview").show(666)
+                $box.find(".que-edit").css("opacity",1)
+                var edit = $("#box-question").data("edit")
+                edit = edit - 1
+                $("#box-question").data("edit", edit)
+                if (edit == 0) $("#que-add").show(666)
+            }
+
             $(".que-save").on("click",function(){
                 $(this).css("opacity",0)
                 var $box = $(this).closest(".box-que-view")
@@ -457,13 +500,7 @@
                     contentType: false,
                     success: function(data){
                         console.log(data)
-                        $box.find(".que-preview-edit").hide(666)
-                        $box.find(".que-preview").show(666)
-                        $box.find(".que-edit").css("opacity",1)
-                        var edit = $("#box-question").data("edit")
-                        edit = edit - 1
-                        $("#box-question").data("edit", edit)
-                        if (edit == 0) $("#que-add").show(666)
+                        initPreview($box)
                     }
                 })
             })
@@ -476,7 +513,7 @@
                     $(this).removeClass("active")
                 })
                 $(this).addClass("active")
-                $box.find("#que-right_option").val(option)
+                $box.find(".que-right_option").val(option)
             })
 
             $("#que-add").on("click",function(){
@@ -488,13 +525,14 @@
                 var $template = $("#template-que").clone(true)
                 //console.log($template.attr("id"))
                 $template.removeAttr("id")
-                $template.find(".que-id").text(que_num)
                 $(this).data("num", que_num)
                 var edit = $("#box-question").data("edit")
                 edit = edit + 1
                 $("#box-question").data("edit", edit)
                 //console.log($template.attr("id"))
                 $template.insertBefore($(this))
+                $box.find(".preview-question_no").text(que_num)
+                $box.find(".que-question_no").text(que_num)
                 $(this).hide()
                 $template.show(233)
             })
@@ -735,11 +773,11 @@
                         <strong class="pull-right menu-que pointer">
                             <span class="que-edit glyphicon glyphicon-edit" aria-hidden="true" style="display: none"></span>
                         </strong>
-                        <h4><strong class="text-info mg-right">1.</strong>世界杯的作用是?</h4>
-                        <p><strong class="text-primary mg-right">A.</strong>许愿</p>
-                        <p><strong class="text-primary mg-right">B.</strong>喝酒</p>
-                        <p><strong class="text-primary mg-right">C.</strong>摆饰</p>
-                        <p><strong class="text-primary mg-right">D.</strong>踢</p>
+                        <h4><strong class="preview-question_no text-info mg-right">1</strong><span class="preview-title">世界杯的作用是?</span></h4>
+                        <p><strong class="text-primary mg-right">A.</strong><span class="preview-option_a">许愿</span></p>
+                        <p><strong class="text-primary mg-right">B.</strong><span class="preview-option_b">喝酒</span></p>
+                        <p><strong class="text-primary mg-right">C.</strong><span class="preview-option_c">摆饰</span></p>
+                        <p><strong class="text-primary mg-right">D.</strong><span class="preview-option_d"></span></p>
                     </div>
                     <div class="que-preview-edit">
                         <strong class="pull-right menu-que pointer">
@@ -750,14 +788,14 @@
                             <div id="box-que-article" class="form-group" style="display: none">
                                 <label class="text-primary col-sm-2 control-label">阅读材料:</label>
                                 <div class="col-sm-9">
-                                    <textarea name="article" class="form-control" rows="9"></textarea>
+                                    <textarea id="que-article" name="article" class="form-control" rows="9"></textarea>
                                 </div>
                             </div>
                             <div id="box-que-image" class="form-group" style="display: none">
                                 <label class="text-primary col-sm-2 control-label">图片材料:</label>
                                 <div class="col-sm-9">
                                     <div class="box-content">
-                                        <input id="que-image" name="file" class="up-que-image pointer" type="file">
+                                        <input id="que-image" name="file_image" class="up-que-image pointer" type="file">
                                         <img class="que-image" src="">
                                     </div>
                                 </div>
@@ -765,17 +803,18 @@
                             <div id="box-que-audio" class="form-group" style="display: none">
                                 <label class="text-primary col-sm-2 control-label">听力材料:</label>
                                 <div class="col-sm-4">
-                                    <input id="" name="" type="text" class="form-control" readonly>
+                                    <input id="que-sound" name="file_sound" class="up-que-image pointer" type="file">
+                                    <input type="text" class="form-control" readonly>
                                 </div>
                                 <button type="button" class="btn btn-default col-sm-2">上传</button>
                                 <button type="button" class="btn btn-default col-sm-2">试听</button>
                             </div>
                             <div class="form-group">
                                 <label class="text-primary col-sm-1 control-label">
-                                    <strong class="que-id text-info mg-right">1</strong>
+                                    <strong class="que-question_no text-info mg-right">1</strong>
                                 </label>
                                 <div class="col-sm-9">
-                                    <textarea id="que-title" name="title" class="form-control" rows="2" placeholder="题目"></textarea>
+                                    <textarea name="title" class="que-title form-control" rows="2" placeholder="题目"></textarea>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -783,7 +822,7 @@
                                     <strong class="text-info mg-right">A.</strong>
                                 </label>
                                 <div class="col-sm-6">
-                                    <input id="que-option_a" name="option_a" placeholder="选项A" type="text" class="form-control">
+                                    <input name="option_a" placeholder="选项A" type="text" class="que-option_a form-control">
                                 </div>
                                 <button type="button" data-option="A" class="right_option btn btn-default col-sm-2">正解</button>
                             </div>
@@ -792,7 +831,7 @@
                                     <strong class="text-info mg-right">B.</strong>
                                 </label>
                                 <div class="col-sm-6">
-                                    <input id="que-option_b" name="option_b" placeholder="选项B" type="text" class="form-control">
+                                    <input name="option_b" placeholder="选项B" type="text" class="que-option_b form-control">
                                 </div>
                                 <button type="button" data-option="B" class="right_option btn btn-default col-sm-2">正解</button>
                             </div>
@@ -801,7 +840,7 @@
                                     <strong class="text-info mg-right">C.</strong>
                                 </label>
                                 <div class="col-sm-6">
-                                    <input id="que-option_c" name="option_c" placeholder="选项C" type="text" class="form-control">
+                                    <input name="option_c" placeholder="选项C" type="text" class="que-option_c form-control">
                                 </div>
                                 <button type="button" data-option="C" class="right_option btn btn-default col-sm-2">正解</button>
                             </div>
@@ -810,7 +849,7 @@
                                     <strong class="text-info mg-right">D.</strong>
                                 </label>
                                 <div class="col-sm-6">
-                                    <input id="que-option_d" name="option_d" placeholder="选项D" type="text" class="form-control">
+                                    <input name="option_d" placeholder="选项D" type="text" class="que-option_a form-control">
                                 </div>
                                 <button type="button" data-option="D" class="right_option btn btn-default col-sm-2">正解</button>
                             </div>
@@ -821,13 +860,13 @@
                             <div class="form-group">
                                 <label class="text-primary col-sm-2 control-label">正解:</label>
                                 <div class="col-sm-9">
-                                    <input id="que-right_option" name="right_option" type="text" class="form-control">
+                                    <input name="right_option" type="text" class="que-right_option form-control">
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="text-primary col-sm-2 control-label">解析:</label>
                                 <div class="col-sm-9">
-                                    <textarea id="que-an_explain" name="an_explain" class="form-control" rows="3"></textarea>
+                                    <textarea name="an_explain" class="que-an_explain form-control" rows="3"></textarea>
                                 </div>
                             </div>
                         </form>
