@@ -371,7 +371,7 @@
             var initModalPaper = function(paper){
                 console.log(paper)
                 $('#paper-level > option[selected]').removeAttr("selected")
-                if (paper){
+                if (paper.paper_id != undefined){
                     $("#paper-title").data("paper_id", paper.paper_id)
                     $("#paper-title").val(paper.title)
                     $("#paper-description").val(paper.description)
@@ -379,6 +379,10 @@
                     $(tar_level).attr("selected", true)
                     var tar_diff = "#paper-"+paper.difficulty
                     $(tar_diff).trigger("click")
+                    //查询试题
+                    loadQuestion(paper.paper_id)
+                    $("#paper-bar").css("width", "100%")
+                    $("#paper-menu").show(233)
                 }else{
                     var paper_id = new Date().getTime()
                     $("#paper-title").data("paper_id", paper_id)
@@ -386,6 +390,8 @@
                     $("#paper-description").val("")
                     $("#level-default").attr("selected", true)
                     $("#paper-normal").trigger("click")
+                    $("#paper-bar").css("width", "0%")
+                    $("#paper-menu").hide()
                 }
                 $("#modal-paper").modal("show")
             }
@@ -410,13 +416,6 @@
                 }
             }
 
-            var initModalQuestion = function(t_question){
-                console.log("init_question")
-                for (let v of t_question){
-                    
-                }
-            }
-
             //查询试卷
             $("#btn-question").on("click",function(){
                 console.log("btn-question")
@@ -431,16 +430,38 @@
                 })
             })
 
+            //试题分型预览
+            var initPreviewQuestion = function(t_question){
+                console.log("initPreviewQuestion...")
+                for (let v of t_question){
+                    console.log(v)
+                    var $template = $("#template-que").clone(true)
+                    $template.removeAttr("id")
+                    $template.insertBefore($(this))
+
+                    //填充数据
+                    $template.find(".preview-title").text(t_question.title)
+                    $template.find(".preview-option_a").text(t_question.option_a)
+                    $template.find(".preview-option_b").text(t_question.option_b)
+                    $template.find(".preview-option_c").text(t_question.option_c)
+                    $template.find(".preview-option_d").text(t_question.option_d)
+                }
+            }
+
             //查询试题:paper_id
             var loadQuestion = function(paper_id){
+                console.log("loadQuestion...")
                 $.ajax({
                     type: "post",
                     crossDomain: true,
                     url: query_question,
-                    data: paper_id,
+                    data: {paper_id},
                     success: function(data){
                         var t_question = data.data
-                        initModalQuestion(t_question)
+                        initPreviewQuestion(t_question)
+                    },
+                    error: function(data){
+                        console.log(data)
                     }
                 })
             }
@@ -515,30 +536,32 @@
                 $(this).addClass("active")
                 $box.find(".que-right_option").val(option)
             })
-
+            
             $("#que-add").on("click",function(){
                 var que_num = $(this).data("num")
                 var que_type = $(this).data("type")
                 que_num += 1
                 console.log(que_num)
-                var $box = $(this).closest(".box-question")
+                var $box = $("#box-question")
                 var $template = $("#template-que").clone(true)
-                //console.log($template.attr("id"))
                 $template.removeAttr("id")
                 $(this).data("num", que_num)
                 var edit = $("#box-question").data("edit")
                 edit = edit + 1
                 $("#box-question").data("edit", edit)
-                //console.log($template.attr("id"))
                 $template.insertBefore($(this))
-                $box.find(".preview-question_no").text(que_num)
-                $box.find(".que-question_no").text(que_num)
+                $template.find(".preview-question_no").text(que_num)
+                $template.find(".label-question_no").text(que_num)
+                $template.find(".que-question_no").val(que_num)
+                var paper_id = $("#paper-title").data("paper_id")
+                $template.find(".que-paper_id").val(paper_id)
                 $(this).hide()
                 $template.show(233)
             })
 
             var savePaper = function(t_paper){
                 console.log(t_paper)
+                $("#paper-bar").css("width", "0%")
                 $.ajax({
                     type: "post",
                     crossDomain: true,
@@ -615,6 +638,10 @@
                 var src_audio = $("#src-audio").text()
                 console.log(src_audio)
                 loadSound(src_audio, 1)
+            })
+
+            $("#modal-paper").on('hidden.bs.modal', function (e) {
+                console.log("hidden...")
             })
         })
 
@@ -785,6 +812,10 @@
                         </strong>
                         <form class="form-horizontal" enctype="multipart/form-data">
                             <input name="type" type="hidden" value="1">
+                            <input class="que-paper_id" name="paper_id" type="hidden" value="0">
+                            <input class="que-question_no" name="question_no" type="hidden" value="0">
+                            <input class="que-uploader" name="uploader" type="hidden" value="someone">
+
                             <div id="box-que-article" class="form-group" style="display: none">
                                 <label class="text-primary col-sm-2 control-label">阅读材料:</label>
                                 <div class="col-sm-9">
@@ -811,7 +842,7 @@
                             </div>
                             <div class="form-group">
                                 <label class="text-primary col-sm-1 control-label">
-                                    <strong class="que-question_no text-info mg-right">1</strong>
+                                    <strong class="label-question_no text-info mg-right">1</strong>
                                 </label>
                                 <div class="col-sm-9">
                                     <textarea name="title" class="que-title form-control" rows="2" placeholder="题目"></textarea>
@@ -849,7 +880,7 @@
                                     <strong class="text-info mg-right">D.</strong>
                                 </label>
                                 <div class="col-sm-6">
-                                    <input name="option_d" placeholder="选项D" type="text" class="que-option_a form-control">
+                                    <input name="option_d" placeholder="选项D" type="text" class="que-option_d form-control">
                                 </div>
                                 <button type="button" data-option="D" class="right_option btn btn-default col-sm-2">正解</button>
                             </div>
