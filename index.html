@@ -430,21 +430,27 @@
                 })
             })
 
-            //试题分型预览
+            //试题分类型预览
             var initPreviewQuestion = function(t_question){
                 console.log("initPreviewQuestion...")
                 for (let v of t_question){
                     console.log(v)
                     var $template = $("#template-que").clone(true)
-                    $template.removeAttr("id")
-                    $template.insertBefore($(this))
 
                     //填充数据
-                    $template.find(".preview-title").text(t_question.title)
-                    $template.find(".preview-option_a").text(t_question.option_a)
-                    $template.find(".preview-option_b").text(t_question.option_b)
-                    $template.find(".preview-option_c").text(t_question.option_c)
-                    $template.find(".preview-option_d").text(t_question.option_d)
+                    $template.data("question", v)
+                    $template.find(".preview-title").text(v.title)
+                    $template.find(".preview-option_a").text(v.option_a)
+                    $template.find(".preview-option_b").text(v.option_b)
+                    $template.find(".preview-option_c").text(v.option_c)
+                    $template.find(".preview-option_d").text(v.option_d)
+
+                    var que_type_class = "type_" + v.type
+                    $template.addClass(que_type_class)
+                    
+                    //去除id并放到容器
+                    $template.removeAttr("id")
+                    $template.insertBefore($("#que-add"))
                 }
             }
 
@@ -466,16 +472,18 @@
                 })
             }
 
-            $(".box-que-view,.box-question-title").on("mouseover",function(){
+            $(".box-template,.box-question-title").on("mouseover",function(){
                 $(this).find(".glyphicon").show()
             })
-            $(".box-que-view,.box-question-title").on("mouseout",function(){
+            $(".box-template,.box-question-title").on("mouseout",function(){
                 $(this).find(".glyphicon").hide()
             })
 
             $(".que-edit").on("click",function(){
                 $(this).css("opacity",0)
-                var $box = $(this).closest(".box-que-view")
+                var $box = $(this).closest(".box-template")
+                var question = $box.data("question")
+                console.log(question)
                 $box.find(".que-preview").hide(666)
                 $box.find(".que-preview-edit").show(666)
                 $box.find(".que-save").css("opacity",1)
@@ -509,7 +517,7 @@
 
             $(".que-save").on("click",function(){
                 $(this).css("opacity",0)
-                var $box = $(this).closest(".box-que-view")
+                var $box = $(this).closest(".box-template")
                 var formData = new FormData($box.find("form")[0]);
                 $.ajax({
                     type: "post",
@@ -598,18 +606,24 @@
             })
 
             $("#paper-preview,#paper-type1,#paper-type2,#paper-type3,#paper-type4").on("click",function(){
+                //把 试题类型/试题编号 放在 '+' 按钮上
                 var que_num = $(this).data("num")
                 var que_type = $(this).data("type")
                 $("#que-add").data("num", que_num)
                 $("#que-add").data("type", que_type)
                 $("#que-type").val(que_type)
-                if (que_type == 1){
-                    $("#box-que-bar").show(233)
-                    $("#box-question").show(233)
-                }else{
-                    $("#box-que-bar").hide()
-                    $("#box-question").hide()
-                }
+
+                //隐藏所有
+                $(".box-template").each(function(){
+                    $(this).hide(233)
+                })
+                //显示对应类型的试题
+                $("#box-question").show(233)
+                $("#box-que-bar").show(233)
+                var que_type_class = ".type_" + que_type
+                $(que_type_class).each(function(){
+                    $(this).show(233)
+                })
 
             })
 
@@ -640,8 +654,16 @@
                 loadSound(src_audio, 1)
             })
 
+            //试卷隐藏时
             $("#modal-paper").on('hidden.bs.modal', function (e) {
                 console.log("hidden...")
+                $("#box-question").hide()
+                $("#box-que-bar").hide()
+                $(".box-template").each(function(){
+                    if($(this).attr("id") == undefined){
+                        $(this).remove()
+                    }
+                })
             })
         })
 
@@ -795,8 +817,8 @@
     </div>
 </div>
             <div id="box-question" class="box-question" data-edit="0" style="display: none">
-                <div id="template-que" class="box-que-view" style="display: none">
-                    <div class="que-preview" style="display: none">
+                <div id="template-que" class="box-template" style="display: none">
+                    <div class="que-preview">
                         <strong class="pull-right menu-que pointer">
                             <span class="que-edit glyphicon glyphicon-edit" aria-hidden="true" style="display: none"></span>
                         </strong>
@@ -806,7 +828,7 @@
                         <p><strong class="text-primary mg-right">C.</strong><span class="preview-option_c">摆饰</span></p>
                         <p><strong class="text-primary mg-right">D.</strong><span class="preview-option_d"></span></p>
                     </div>
-                    <div class="que-preview-edit">
+                    <div class="que-preview-edit" style="display: none">
                         <strong class="pull-right menu-que pointer">
                             <span class="que-save glyphicon glyphicon-floppy-save" aria-hidden="true" style="display: none"></span>
                         </strong>
