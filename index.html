@@ -439,11 +439,25 @@
 
                     //填充数据
                     $template.data("question", v)
+                    //填充预览页
                     $template.find(".preview-title").text(v.title)
                     $template.find(".preview-option_a").text(v.option_a)
                     $template.find(".preview-option_b").text(v.option_b)
                     $template.find(".preview-option_c").text(v.option_c)
                     $template.find(".preview-option_d").text(v.option_d)
+
+                    //填充可编辑页
+                    $template.find(".que-title").val(v.title)
+                    $template.find(".que-option_a").val(v.option_a)
+                    $template.find(".que-option_b").val(v.option_b)
+                    $template.find(".que-option_c").val(v.option_c)
+                    $template.find(".que-option_d").val(v.option_d)
+
+                    $template.find(".que-paper_id").val(v.paper_id)
+                    $template.find(".que-question_no").val(v.question_no)
+
+                    $template.find(".que-right_option").val(v.right_option)
+                    $template.find(".que-an_explain").val(v.an_explain)
 
                     var que_type_class = "type_" + v.type
                     $template.addClass(que_type_class)
@@ -481,34 +495,35 @@
 
             $(".que-edit").on("click",function(){
                 $(this).css("opacity",0)
-                var $box = $(this).closest(".box-template")
-                var question = $box.data("question")
+                var $template = $(this).closest(".box-template")
+                var question = $template.data("question")
                 console.log(question)
-                $box.find(".que-preview").hide(666)
-                $box.find(".que-preview-edit").show(666)
-                $box.find(".que-save").css("opacity",1)
+                $template.find(".que-preview").hide(666)
+                $template.find(".que-preview-edit").show(666)
+                $template.find(".que-save").css("opacity",1)
                 var edit = $("#box-question").data("edit")
                 edit = edit + 1
                 $("#box-question").data("edit", edit)
                 $("#que-add").hide()
             })
+            
+            //试题预览
+            var showQuePreview = function($template){
+                var title = $template.find(".que-title").val().trim()
+                var option_a = $template.find(".que-option_a").val().trim()
+                var option_b = $template.find(".que-option_b").val().trim()
+                var option_c = $template.find(".que-option_c").val().trim()
+                var option_d = $template.find(".que-option_d").val().trim()
 
-            var initPreview = function($box){
-                var title = $box.find(".que-title").val().trim()
-                var option_a = $box.find(".que-option_a").val().trim()
-                var option_b = $box.find(".que-option_b").val().trim()
-                var option_c = $box.find(".que-option_c").val().trim()
-                var option_d = $box.find(".que-option_d").val().trim()
+                $template.find(".preview-title").text(title)
+                $template.find(".preview-option_a").text(option_a)
+                $template.find(".preview-option_b").text(option_b)
+                $template.find(".preview-option_c").text(option_c)
+                $template.find(".preview-option_d").text(option_d)
 
-                $box.find(".preview-title").text(title)
-                $box.find(".preview-option_a").text(option_a)
-                $box.find(".preview-option_b").text(option_b)
-                $box.find(".preview-option_c").text(option_c)
-                $box.find(".preview-option_d").text(option_d)
-
-                $box.find(".que-preview-edit").hide(666)
-                $box.find(".que-preview").show(666)
-                $box.find(".que-edit").css("opacity",1)
+                $template.find(".que-preview-edit").hide(666)
+                $template.find(".que-preview").show(666)
+                $template.find(".que-edit").css("opacity",1)
                 var edit = $("#box-question").data("edit")
                 edit = edit - 1
                 $("#box-question").data("edit", edit)
@@ -517,7 +532,7 @@
 
             $(".que-save").on("click",function(){
                 $(this).css("opacity",0)
-                var $box = $(this).closest(".box-template")
+                var $template = $(this).closest(".box-template")
                 var formData = new FormData($box.find("form")[0]);
                 $.ajax({
                     type: "post",
@@ -529,7 +544,7 @@
                     contentType: false,
                     success: function(data){
                         console.log(data)
-                        initPreview($box)
+                        showQuePreview($template)
                     }
                 })
             })
@@ -552,18 +567,22 @@
                 console.log(que_num)
                 var $box = $("#box-question")
                 var $template = $("#template-que").clone(true)
-                $template.removeAttr("id")
                 $(this).data("num", que_num)
                 var edit = $("#box-question").data("edit")
                 edit = edit + 1
                 $("#box-question").data("edit", edit)
-                $template.insertBefore($(this))
                 $template.find(".preview-question_no").text(que_num)
                 $template.find(".label-question_no").text(que_num)
                 $template.find(".que-question_no").val(que_num)
                 var paper_id = $("#paper-title").data("paper_id")
                 $template.find(".que-paper_id").val(paper_id)
+
                 $(this).hide()
+                $template.find(".que-preview").hide()
+                $template.find(".que-preview-edit").show()
+                
+                $template.removeAttr("id")
+                $template.insertBefore($(this))
                 $template.show(233)
             })
 
@@ -618,6 +637,7 @@
                     $(this).hide(233)
                 })
                 //显示对应类型的试题
+                $("#que-add").show(233)
                 $("#box-question").show(233)
                 $("#box-que-bar").show(233)
                 var que_type_class = ".type_" + que_type
