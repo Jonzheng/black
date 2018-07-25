@@ -241,6 +241,21 @@
                 }
             }
 
+            $("#file_audio").on("change",function(){
+                var $img = $(this).next("img")
+                var $file_audio = $(this);
+                var fileObj = $file_audio[0];
+                var windowURL = window.URL || window.webkitURL;
+                var dataURL;
+
+                if (fileObj && fileObj.files && fileObj.files[0]) {
+                    dataURL = windowURL.createObjectURL(fileObj.files[0]);
+                    $img.attr('src', dataURL);
+                } else {
+                    console.log("file_audio else...")
+                }
+            })
+
             $("#s-title,#s-serifu,#s-roma").on("keyup",function(){
                 var _val = $(this).val().trim()
                 $(this).val(_val)
@@ -434,12 +449,14 @@
             var initPreviewQuestion = function(t_question){
                 console.log("initPreviewQuestion...")
                 for (let v of t_question){
-                    console.log(v)
                     var $template = $("#template-que").clone(true)
 
                     //填充数据
                     $template.data("question", v)
                     //填充预览页
+                    var right_option_class = ".right_option_" + v.right_option.toLowerCase()
+                    $template.find(right_option_class).addClass("active")
+                    $template.find(".preview-question_no").text(v.question_no)
                     $template.find(".preview-title").text(v.title)
                     $template.find(".preview-option_a").text(v.option_a)
                     $template.find(".preview-option_b").text(v.option_b)
@@ -506,11 +523,33 @@
                 
             })
 
+            $(".file_image").on("change",function(){
+                var $img = $(this).next("img")
+                var $file_image = $(this);
+                var fileObj = $file_image[0];
+                var windowURL = window.URL || window.webkitURL;
+                var dataURL;
+
+                if (fileObj && fileObj.files && fileObj.files[0]) {
+                    dataURL = windowURL.createObjectURL(fileObj.files[0]);
+                    $img.attr('src', dataURL);
+                } else {
+                    console.log("file_image else...")
+    
+                }
+            })
+
             $(".que-edit").on("click",function(){
                 $(this).css("opacity",0)
                 var $template = $(this).closest(".box-template")
-                var question = $template.data("question")
-                console.log(question)
+                //var question = $template.data("question")
+                var que_no = $template.find(".que-question_no").val().trim()
+                var right_option = $template.find(".que-right_option").val().trim()
+
+                var right_option_class = ".right_option_" + right_option.toLowerCase()
+                $template.find(right_option_class).addClass("active")
+                $template.find(".label-question_no").text(que_no)
+                
                 $template.find(".que-preview").hide(666)
                 $template.find(".que-preview-edit").show(666)
                 $template.find(".que-save").css("opacity",1)
@@ -534,6 +573,7 @@
                 var option_c = $template.find(".que-option_c").val().trim()
                 var option_d = $template.find(".que-option_d").val().trim()
 
+                $template.find(".preview-question_no").text(que_no)
                 $template.find(".preview-title").text(title)
                 $template.find(".preview-option_a").text(option_a)
                 $template.find(".preview-option_b").text(option_b)
@@ -580,7 +620,7 @@
             })
             
             $("#que-add").on("click",function(){
-                var que_no = $(this).data("que_no")
+                var que_no = parseInt($(this).data("que_no"))
                 var que_type = $(this).data("type")
                 que_no += 1
                 console.log(que_type, que_no)
@@ -666,27 +706,6 @@
                 $("#que-add").data("que_no", que_no)
             })
 
-            $("#file").on("change",function(){
-                var $img = $(this).next("img")
-                var $file = $(this);
-                var fileObj = $file[0];
-                var windowURL = window.URL || window.webkitURL;
-                var dataURL;
-
-                if (fileObj && fileObj.files && fileObj.files[0]) {
-                    dataURL = windowURL.createObjectURL(fileObj.files[0]);
-                    $img.attr('src', dataURL);
-                } else {
-                    dataURL = $file.val();
-                    var imgObj = document.getElementById("preview");
-                    imgObj.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod=scale)";
-                    imgObj.filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = dataURL;
-    
-                }
-
-
-            })
-
             $("#btn-play").on("click",function(){
                 var src_audio = $("#src-audio").text()
                 console.log(src_audio)
@@ -725,7 +744,7 @@
                                 <input id="s-shadow" name="shadow" type="hidden">
                                 <input id="s-file_id" name="file_id" type="hidden">
                                 <div class="box-content">
-                                    <input id="file" name="file" class="up-image pointer" type="file">
+                                    <input id="file_audio" name="file_audio" class="up-image pointer" type="file">
                                     <img class="box-image" src="">
                                     <div class="box-text">
                                         <p id="src-audio" class="hidden"></p>
@@ -861,7 +880,7 @@
                         <strong class="pull-right menu-que pointer">
                             <span class="que-edit glyphicon glyphicon-edit" aria-hidden="true" style="display: none"></span>
                         </strong>
-                        <h4><strong class="preview-question_no text-info mg-right">1</strong><span class="preview-title">世界杯的作用是?</span></h4>
+                        <h4><strong class="preview-question_no text-info mg-right"></strong><span class="preview-title">世界杯的作用是?</span></h4>
                         <p><strong class="text-primary mg-right">A.</strong><span class="preview-option_a">许愿</span></p>
                         <p><strong class="text-primary mg-right">B.</strong><span class="preview-option_b">喝酒</span></p>
                         <p><strong class="text-primary mg-right">C.</strong><span class="preview-option_c">摆饰</span></p>
@@ -899,7 +918,7 @@
                                 <label class="text-primary col-sm-2 control-label">图片材料:</label>
                                 <div class="col-sm-9">
                                     <div class="box-content">
-                                        <input id="que-image" name="file_image" class="up-que-image pointer" type="file">
+                                        <input name="file_image" class="file_image up-que-image pointer" type="file">
                                         <img class="que-image" src="">
                                     </div>
                                 </div>
@@ -929,7 +948,7 @@
                                 <div class="col-sm-6">
                                     <input name="option_a" placeholder="选项A" type="text" class="que-option_a form-control">
                                 </div>
-                                <button type="button" data-option="A" class="right_option btn btn-default col-sm-2">正解</button>
+                                <button type="button" data-option="A" class="right_option right_option_a btn btn-default col-sm-2">正解</button>
                             </div>
                             <div class="form-group">
                                 <label class="text-primary col-sm-1 control-label">
@@ -938,7 +957,7 @@
                                 <div class="col-sm-6">
                                     <input name="option_b" placeholder="选项B" type="text" class="que-option_b form-control">
                                 </div>
-                                <button type="button" data-option="B" class="right_option btn btn-default col-sm-2">正解</button>
+                                <button type="button" data-option="B" class="right_option right_option_b btn btn-default col-sm-2">正解</button>
                             </div>
                             <div class="form-group">
                                 <label class="text-primary col-sm-1 control-label">
@@ -947,7 +966,7 @@
                                 <div class="col-sm-6">
                                     <input name="option_c" placeholder="选项C" type="text" class="que-option_c form-control">
                                 </div>
-                                <button type="button" data-option="C" class="right_option btn btn-default col-sm-2">正解</button>
+                                <button type="button" data-option="C" class="right_option right_option_c btn btn-default col-sm-2">正解</button>
                             </div>
                             <div class="form-group">
                                 <label class="text-primary col-sm-1 control-label">
@@ -956,7 +975,7 @@
                                 <div class="col-sm-6">
                                     <input name="option_d" placeholder="选项D" type="text" class="que-option_d form-control">
                                 </div>
-                                <button type="button" data-option="D" class="right_option btn btn-default col-sm-2">正解</button>
+                                <button type="button" data-option="D" class="right_option right_option_d btn btn-default col-sm-2">正解</button>
                             </div>
                             <strong class="pull-right menu-que pointer">
                                 <span class="que-delete glyphicon glyphicon-trash" aria-hidden="true" style="display: none"></span>
