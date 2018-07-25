@@ -493,6 +493,19 @@
                 $(this).find(".glyphicon").hide()
             })
 
+            $(".src-que").on("click",function(){
+                var $template = $(this).closest(".box-template")
+                var box_class = "." + $(this).data("box")
+                if ($(this).hasClass("active")){
+                    console.log("hide")
+                    $template.find(box_class).hide()
+                }else{
+                    console.log(box_class)
+                    $template.find(box_class).show(233)
+                }
+                
+            })
+
             $(".que-edit").on("click",function(){
                 $(this).css("opacity",0)
                 var $template = $(this).closest(".box-template")
@@ -507,8 +520,14 @@
                 $("#que-add").hide()
             })
             
-            //试题预览
+            //保存成功--试题预览
             var showQuePreview = function($template){
+                var type = $template.find(".que-type").val().trim()
+                var que_type_class = "type_" + type
+                $template.addClass(que_type_class)
+                var que_no = $template.find(".que-question_no").val().trim()
+                $("#que-add").data("que_no", que_no)
+
                 var title = $template.find(".que-title").val().trim()
                 var option_a = $template.find(".que-option_a").val().trim()
                 var option_b = $template.find(".que-option_b").val().trim()
@@ -533,7 +552,7 @@
             $(".que-save").on("click",function(){
                 $(this).css("opacity",0)
                 var $template = $(this).closest(".box-template")
-                var formData = new FormData($box.find("form")[0]);
+                var formData = new FormData($template.find("form")[0]);
                 $.ajax({
                     type: "post",
                     crossDomain: true,
@@ -561,21 +580,22 @@
             })
             
             $("#que-add").on("click",function(){
-                var que_num = $(this).data("num")
+                var que_no = $(this).data("que_no")
                 var que_type = $(this).data("type")
-                que_num += 1
-                console.log(que_num)
+                que_no += 1
+                console.log(que_type, que_no)
                 var $box = $("#box-question")
                 var $template = $("#template-que").clone(true)
-                $(this).data("num", que_num)
+                $(this).data("que_no", que_no)
                 var edit = $("#box-question").data("edit")
                 edit = edit + 1
                 $("#box-question").data("edit", edit)
-                $template.find(".preview-question_no").text(que_num)
-                $template.find(".label-question_no").text(que_num)
-                $template.find(".que-question_no").val(que_num)
+                $template.find(".preview-question_no").text(que_no)
+                $template.find(".label-question_no").text(que_no)
+                $template.find(".que-question_no").val(que_no)
                 var paper_id = $("#paper-title").data("paper_id")
                 $template.find(".que-paper_id").val(paper_id)
+                $template.find(".que-type").val(que_type)
 
                 $(this).hide()
                 $template.find(".que-preview").hide()
@@ -626,11 +646,9 @@
 
             $("#paper-preview,#paper-type1,#paper-type2,#paper-type3,#paper-type4").on("click",function(){
                 //把 试题类型/试题编号 放在 '+' 按钮上
-                var que_num = $(this).data("num")
+                var que_no = 0
                 var que_type = $(this).data("type")
-                $("#que-add").data("num", que_num)
                 $("#que-add").data("type", que_type)
-                $("#que-type").val(que_type)
 
                 //隐藏所有
                 $(".box-template").each(function(){
@@ -642,9 +660,10 @@
                 $("#box-que-bar").show(233)
                 var que_type_class = ".type_" + que_type
                 $(que_type_class).each(function(){
+                    que_no += 1
                     $(this).show(233)
                 })
-
+                $("#que-add").data("que_no", que_no)
             })
 
             $("#file").on("change",function(){
@@ -814,19 +833,19 @@
 </div>
 <div id="paper-menu" class="text-center" style="display: none;margin-bottom: 20px;">
     <div class="btn-group" data-toggle="buttons">
-        <label id="paper-preview" data-type="0" data-num="0" class="btn btn-default">
+        <label id="paper-preview" data-type="0" class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">试卷预览
         </label>
-        <label id="paper-type1" data-type="1" data-num="0" class="btn btn-default">
+        <label id="paper-type1" data-type="1" class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">选择题
         </label>
-        <label id="paper-type2" data-type="2" data-num="0" class="btn btn-default">
+        <label id="paper-type2" data-type="2" class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">阅读题
         </label>
-        <label id="paper-type3" data-type="3" data-num="0" class="btn btn-default">
+        <label id="paper-type3" data-type="3" class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">听解题(I)
         </label>
-        <label id="paper-type4" data-type="4" data-num="0" class="btn btn-default">
+        <label id="paper-type4" data-type="4" class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">听解题(II)
         </label>
     </div>
@@ -852,19 +871,31 @@
                         <strong class="pull-right menu-que pointer">
                             <span class="que-save glyphicon glyphicon-floppy-save" aria-hidden="true" style="display: none"></span>
                         </strong>
+                        <div class="btn-group" data-toggle="buttons">
+                            <label class="src-que btn btn-sm btn-default" data-box="box-que-image">
+                            <input type="checkbox" autocomplete="off">图片素材
+                            </label>
+                            <label class="src-que btn btn-sm btn-default" data-box="box-que-article">
+                            <input type="checkbox" autocomplete="off">阅读素材
+                            </label>
+                            <label class="src-que btn btn-sm btn-default" data-box="box-que-sound">
+                            <input type="checkbox" autocomplete="off">语音素材
+                            </label>
+                        </div>
+                        <hr>
                         <form class="form-horizontal" enctype="multipart/form-data">
-                            <input name="type" type="hidden" value="1">
+                            <input class="que-type" name="type" type="hidden" value="1">
                             <input class="que-paper_id" name="paper_id" type="hidden" value="0">
                             <input class="que-question_no" name="question_no" type="hidden" value="0">
                             <input class="que-uploader" name="uploader" type="hidden" value="someone">
 
-                            <div id="box-que-article" class="form-group" style="display: none">
+                            <div class="box-que-article form-group" style="display: none">
                                 <label class="text-primary col-sm-2 control-label">阅读材料:</label>
                                 <div class="col-sm-9">
                                     <textarea id="que-article" name="article" class="form-control" rows="9"></textarea>
                                 </div>
                             </div>
-                            <div id="box-que-image" class="form-group" style="display: none">
+                            <div class="box-que-image form-group" style="display: none">
                                 <label class="text-primary col-sm-2 control-label">图片材料:</label>
                                 <div class="col-sm-9">
                                     <div class="box-content">
@@ -873,8 +904,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div id="box-que-audio" class="form-group" style="display: none">
-                                <label class="text-primary col-sm-2 control-label">听力材料:</label>
+                            <div class="box-que-sound form-group" style="display: none">
+                                <label class="text-primary col-sm-2 control-label">语音材料:</label>
                                 <div class="col-sm-4">
                                     <input id="que-sound" name="file_sound" class="up-que-image pointer" type="file">
                                     <input type="text" class="form-control" readonly>
@@ -882,6 +913,7 @@
                                 <button type="button" class="btn btn-default col-sm-2">上传</button>
                                 <button type="button" class="btn btn-default col-sm-2">试听</button>
                             </div>
+                            <hr>
                             <div class="form-group">
                                 <label class="text-primary col-sm-1 control-label">
                                     <strong class="label-question_no text-info mg-right">1</strong>
