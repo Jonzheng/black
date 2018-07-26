@@ -513,9 +513,13 @@
             $(".src-que").on("click",function(){
                 var $template = $(this).closest(".box-template")
                 var box_class = "." + $(this).data("box")
-                if ($(this).hasClass("active")){
+                if ($(this).hasClass("active")){ //to_hide
                     console.log("hide")
-                    $template.find(box_class).hide()
+                    var $src_box =  $template.find(box_class)
+                    $src_box.find("input").val("")
+                    $src_box.find("textarea").val("")
+                    $src_box.find("img").attr("src","")
+                    $src_box.hide()
                 }else{
                     console.log(box_class)
                     $template.find(box_class).show(233)
@@ -637,6 +641,12 @@
                 $template.find(".que-paper_id").val(paper_id)
                 $template.find(".que-type").val(que_type)
 
+                //类型与素材
+                if (que_type == "4" || que_type == "5"){
+                    //听解题
+                    $template.find(".src-que:eq(2)").trigger("click")
+                    $template.find(".src-que:eq(2)").addClass("active")
+                }
                 $(this).hide()
                 $template.find(".que-preview").hide()
                 $template.find(".que-preview-edit").show()
@@ -684,7 +694,7 @@
                 $("#paper-menu").hide()
             })
 
-            $("#paper-preview,#paper-type1,#paper-type2,#paper-type3,#paper-type4").on("click",function(){
+            $(".btn-que-type > label").on("click",function(){
                 //把 试题类型/试题编号 放在 '+' 按钮上
                 var que_no = 0
                 var que_type = $(this).data("type")
@@ -704,6 +714,17 @@
                     $(this).show(233)
                 })
                 $("#que-add").data("que_no", que_no)
+                //试卷预览
+                if (que_type == "0"){
+                    $("#que-add").hide()
+                    for (let i of [1,2,3,4]){
+                        var que_type_class = ".type_" + i
+                        $(que_type_class).each(function(){
+                            que_no += 1
+                            $(this).show(233)
+                        })
+                    }
+                }
             })
 
             $("#btn-play").on("click",function(){
@@ -731,7 +752,7 @@
 </header>
 
 <body>
-
+<div class="box-loading" style="display: none"></div>
     <div id="modal-to" class="modal fade bs-example-modal-lg" aria-hidden="true" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="to_list">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -851,21 +872,29 @@
     </div>
 </div>
 <div id="paper-menu" class="text-center" style="display: none;margin-bottom: 20px;">
-    <div class="btn-group" data-toggle="buttons">
-        <label id="paper-preview" data-type="0" class="btn btn-default">
+    <div class="btn-que-type btn-group" data-toggle="buttons">
+        <label data-type="0" class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">试卷预览
         </label>
-        <label id="paper-type1" data-type="1" class="btn btn-default">
-            <input type="radio" name="options" autocomplete="off">选择题
+        <label data-type="1" class="btn btn-default">
+            <input type="radio" name="options" autocomplete="off">选择题(词汇)
+            <span class="badge" style="background-color: #999"></span>
         </label>
-        <label id="paper-type2" data-type="2" class="btn btn-default">
+        <label data-type="2" class="btn btn-default">
+            <input type="radio" name="options" autocomplete="off">选择题(连词)
+            <span class="badge" style="background-color: #999"></span>
+        </label>
+        <label data-type="3" class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">阅读题
+            <span class="badge" style="background-color: #999"></span>
         </label>
-        <label id="paper-type3" data-type="3" class="btn btn-default">
+        <label data-type="4" class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">听解题(I)
+            <span class="badge" style="background-color: #999"></span>
         </label>
-        <label id="paper-type4" data-type="4" class="btn btn-default">
+        <label data-type="5" class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">听解题(II)
+            <span class="badge" style="background-color: #999"></span>
         </label>
     </div>
 </div>
@@ -911,7 +940,7 @@
                             <div class="box-que-article form-group" style="display: none">
                                 <label class="text-primary col-sm-2 control-label">阅读材料:</label>
                                 <div class="col-sm-9">
-                                    <textarea id="que-article" name="article" class="form-control" rows="9"></textarea>
+                                    <textarea name="article" class="form-control" rows="9"></textarea>
                                 </div>
                             </div>
                             <div class="box-que-image form-group" style="display: none">
@@ -925,11 +954,10 @@
                             </div>
                             <div class="box-que-sound form-group" style="display: none">
                                 <label class="text-primary col-sm-2 control-label">语音材料:</label>
-                                <div class="col-sm-4">
+                                <div class="col-sm-6">
                                     <input id="que-sound" name="file_sound" class="up-que-image pointer" type="file">
                                     <input type="text" class="form-control" readonly>
                                 </div>
-                                <button type="button" class="btn btn-default col-sm-2">上传</button>
                                 <button type="button" class="btn btn-default col-sm-2">试听</button>
                             </div>
                             <hr>
@@ -1024,10 +1052,10 @@
                 
         <div id="top-menu" class="btn-group" data-toggle="buttons" style="display: none">
             <label class="btn btn-default active">
-                <input type="radio" name="options" autocomplete="off" checked>已发布式神
+                <input type="radio" name="options" autocomplete="off" checked>战斗式神
             </label>
             <label id='btn-all' class="btn btn-default">
-                <input type="radio" name="options" autocomplete="off">待发布式神
+                <input type="radio" name="options" autocomplete="off">备战式神
             </label>
             <label id="btn-question" class="btn btn-default">
                 <input type="radio" name="options" autocomplete="off">试卷
