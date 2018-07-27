@@ -695,15 +695,45 @@
             })
 
             $(".btn-que-type > label").on("click",function(){
+                //隐藏所有
+                $(".que-big-type").hide()
+                $("#box-question").hide()
+                $(".box-template").hide()
+
+                var id_type = "#"+$(this).data("type")
+                $(id_type).show()
+                $(id_type).find("option").each(function(){
+                    $(this).removeAttr("selected")
+                })
+                var $option = $(id_type).find("option:eq(0)")
+                $option.attr("selected", true)
+                $(id_type).find("select").trigger("change")
+                /*
+                //试卷预览
+                if (id_type == "0"){
+                    $("#que-add").hide()
+                    for (let i of [1,2,3,4]){
+                        var que_type_class = ".type_" + i
+                        $(que_type_class).each(function(){
+                            $(this).show(233)
+                        })
+                    }
+                }
+                */
+            })
+
+            $(".que-big-type > select").on("change",function(){
+                var que_type = $(this).val()
+                console.log(que_type)
                 //把 试题类型/试题编号 放在 '+' 按钮上
                 var que_no = 0
-                var que_type = $(this).data("type")
                 $("#que-add").data("type", que_type)
 
                 //隐藏所有
                 $(".box-template").each(function(){
                     $(this).hide(233)
                 })
+                if (que_type == 0) return
                 //显示对应类型的试题
                 $("#que-add").show(233)
                 $("#box-question").show(233)
@@ -714,17 +744,6 @@
                     $(this).show(233)
                 })
                 $("#que-add").data("que_no", que_no)
-                //试卷预览
-                if (que_type == "0"){
-                    $("#que-add").hide()
-                    for (let i of [1,2,3,4]){
-                        var que_type_class = ".type_" + i
-                        $(que_type_class).each(function(){
-                            que_no += 1
-                            $(this).show(233)
-                        })
-                    }
-                }
             })
 
             $("#btn-play").on("click",function(){
@@ -822,33 +841,30 @@
                 </div>
 
                     <div class="modal-body">
+                        <div class="box-question-title">
                         <form id="form-que-title" class="form-horizontal" enctype="multipart/form-data">
-                            <div class="box-content">
-                                <div class="box-question-title">
-                                    <strong class="pull-right menu-que pointer">
-                                        <span class="paper-delete glyphicon glyphicon-trash" aria-hidden="true" style="display: none"></span>
-                                        <span class="paper-save glyphicon glyphicon-floppy-save" aria-hidden="true" style="display: none"></span>
-                                    </strong>
-                                    <div class="form-group">
-                                        <label class="text-primary col-sm-1 control-label">标题:</label>
-                                        <div class="col-sm-9">
-                                            <input id="paper-title" name="title" type="text" class="form-control">
-                                        </div>
+                            <strong class="pull-right menu-que pointer">
+                                <span class="paper-delete glyphicon glyphicon-trash" aria-hidden="true" style="display: none"></span>
+                                <span class="paper-save glyphicon glyphicon-floppy-save" aria-hidden="true" style="display: none"></span>
+                            </strong>
+                                <div class="form-group">
+                                    <label class="col-sm-2 text-primary control-label">标题:</label>
+                                    <div class="col-sm-8">
+                                    <input id="paper-title" name="title" type="text" class="form-control">
                                     </div>
+                                </div>
                                     <div class="form-group">
-                                        <label class="text-primary col-sm-1 control-label">备注:</label>
+                                        <label class="col-sm-2 text-primary control-label">备注:</label>
                                         <div class="col-sm-4">
                                             <input id="paper-description" name="description" type="text" class="form-control">
                                         </div>
-
-                                        <select id="paper-level" class="form-control col-sm-3 paper-level">
+                                        <select id="paper-level" class="col-sm-3 form-control paper-level">
                                             <option value="N4">--等级难度--</option>
                                             <option value="N2">N2</option>
                                             <option value="N3">N3</option>
                                             <option id="level-default" value="N4">N4</option>
                                             <option value="N5">N5</option>
                                         </select>
-
                                         <div id="paper-difficulty" class="btn-group" data-toggle="buttons">
                                             <label id="paper-easy" class="btn btn-default">
                                                 <input type="radio" value="easy" name="options" autocomplete="off">简单
@@ -860,43 +876,69 @@
                                                 <input type="radio" value="hard" name="options" autocomplete="off">困难
                                             </label>
                                         </div>
-
                                     </div>
-                                    
+                                <div class="form-group">
+                                    <label class="col-sm-2 text-primary control-label">试卷说明:</label>
+                                    <div class="col-sm-9">
+                                        <textarea name="an_explain" class="que-an_explain form-control" rows="3"></textarea>
+                                    </div>
                                 </div>
-                            </div>
                         </form>
+                    </div>
+
 <div class="progress" style="height: 1px;">
     <div id="paper-bar" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
         <span class="sr-only">100%</span>
     </div>
 </div>
 <div id="paper-menu" class="text-center" style="display: none;margin-bottom: 20px;">
+    
     <div class="btn-que-type btn-group" data-toggle="buttons">
         <label data-type="0" class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">试卷预览
         </label>
-        <label data-type="1" class="btn btn-default">
-            <input type="radio" name="options" autocomplete="off">选择题(词汇)
+        <label data-type="type_select" class="btn btn-default">
+            <input type="radio" name="options" autocomplete="off">选择题
             <span class="badge" style="background-color: #999"></span>
         </label>
-        <label data-type="2" class="btn btn-default">
-            <input type="radio" name="options" autocomplete="off">选择题(连词)
-            <span class="badge" style="background-color: #999"></span>
-        </label>
-        <label data-type="3" class="btn btn-default">
+        <label data-type="type_read" class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">阅读题
             <span class="badge" style="background-color: #999"></span>
         </label>
-        <label data-type="4" class="btn btn-default">
-            <input type="radio" name="options" autocomplete="off">听解题(I)
-            <span class="badge" style="background-color: #999"></span>
-        </label>
-        <label data-type="5" class="btn btn-default">
-            <input type="radio" name="options" autocomplete="off">听解题(II)
+        <label data-type="type_listen" class="btn btn-default">
+            <input type="radio" name="options" autocomplete="off">听解题
             <span class="badge" style="background-color: #999"></span>
         </label>
     </div>
+
+    <div id="type_select" class="que-big-type" style="margin: 10px auto 10px;width:400px;display: none">
+        <select class="text-center form-control">
+            <option value="1">选择题1--根据汉字选假名 / 根据假名选汉字</option>
+            <option value="2">选择题2--选择合适的单词(句意)</option>
+            <option value="3">选择题3--选择意思相近的句子</option>
+            <option value="4">选择题4--选择合适的单词(文法)</option>
+            <option value="5">选择题5--适当的顺序连接成句子(选择★位置的选项)</option>
+        </select>
+    </div>
+
+    <div id="type_read" class="que-big-type" style="margin: 10px auto 10px;width:400px;display: none">
+        <select class="text-center form-control">
+            <option value="6">阅读题--第一篇</option>
+            <option value="6">阅读题--第二篇</option>
+            <option value="6">阅读题--第三篇</option>
+            <option value="6">阅读题--第四篇</option>
+            <option value="6">阅读题--第五篇</option>
+        </select>
+    </div>
+
+    <div id="type_listen" class="que-big-type" style="margin: 10px auto 10px;width:400px;display: none">
+        <select class="text-center form-control">
+            <option value="7">听解题1--语音+图片+选项</option>
+            <option value="8">听解题2--语音+选项</option>
+            <option value="9">听解题3--语音</option>
+        </select>
+    </div>
+
 </div>
 <div id="box-que-bar" class="progress" style="display: none;height: 1px;">
     <div id="que-bar" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
@@ -904,6 +946,20 @@
     </div>
 </div>
             <div id="box-question" class="box-question" data-edit="0" style="display: none">
+
+                <div class="box-que-article form-group">
+                    <label class="text-primary control-label">阅读材料:</label>
+                    <textarea name="" class="form-control" rows="6"></textarea>
+                </div>
+                <div class="box-que-sound form-group">
+                    <label class="text-primary control-label mg-right">语音材料:</label>
+                    <div style="display: inline-flex">
+                        <input id="que-sound" name="file_sound" class="up-que-sound pointer" type="file">
+                        <input type="text" class="form-control" style="width: 500px" readonly>
+                        <button type="button" class="que-sound-listen btn btn-default" style="display: none">试听</button>
+                    </div>
+                </div>
+
                 <div id="template-que" class="box-template" style="display: none">
                     <div class="que-preview">
                         <strong class="pull-right menu-que pointer">
@@ -921,13 +977,7 @@
                         </strong>
                         <div class="btn-group" data-toggle="buttons">
                             <label class="src-que btn btn-sm btn-default" data-box="box-que-image">
-                            <input type="checkbox" autocomplete="off">图片素材
-                            </label>
-                            <label class="src-que btn btn-sm btn-default" data-box="box-que-article">
-                            <input type="checkbox" autocomplete="off">阅读素材
-                            </label>
-                            <label class="src-que btn btn-sm btn-default" data-box="box-que-sound">
-                            <input type="checkbox" autocomplete="off">语音素材
+                                <input type="checkbox" autocomplete="off">图片素材
                             </label>
                         </div>
                         <hr>
@@ -940,7 +990,7 @@
                             <div class="box-que-article form-group" style="display: none">
                                 <label class="text-primary col-sm-2 control-label">阅读材料:</label>
                                 <div class="col-sm-9">
-                                    <textarea name="article" class="form-control" rows="9"></textarea>
+                                    <textarea name="article" class="form-control" rows="6"></textarea>
                                 </div>
                             </div>
                             <div class="box-que-image form-group" style="display: none">
@@ -951,14 +1001,6 @@
                                         <img class="que-image" src="">
                                     </div>
                                 </div>
-                            </div>
-                            <div class="box-que-sound form-group" style="display: none">
-                                <label class="text-primary col-sm-2 control-label">语音材料:</label>
-                                <div class="col-sm-6">
-                                    <input id="que-sound" name="file_sound" class="up-que-image pointer" type="file">
-                                    <input type="text" class="form-control" readonly>
-                                </div>
-                                <button type="button" class="btn btn-default col-sm-2">试听</button>
                             </div>
                             <hr>
                             <div class="form-group">
@@ -1032,7 +1074,6 @@
         </div><!-- modal-body end -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button id="btn-save" type="button" class="btn btn-primary">保存</button>
                 </div>
         </div>
     </div>

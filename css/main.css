@@ -67,6 +67,18 @@ body{
     position: absolute;
 }
 
+.up-que-sound{
+    width:500px;
+    height: 36px;
+    opacity: 0;
+    position: absolute;
+}
+
+.que-sound-listen{
+    margin-left: 20px;
+    width: 160px;
+}
+
 .up-image{
     width:98px;
     height:98px;
@@ -84,7 +96,6 @@ body{
 
 .box-question-title{
     padding: 5px 10px;
-    height: 100px;
     width: 100%;
 }
 
