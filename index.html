@@ -458,6 +458,13 @@
                     $template.find(right_option_class).addClass("active")
                     $template.find(".preview-question_no").text(v.question_no)
                     $template.find(".preview-title").text(v.title)
+                    if (v.title_image){
+                        $template.find(".preview-title_image").attr("src", v.title_image)
+                        $template.find(".preview-title_image").show()
+
+                        $template.find(".img-title_image").attr("src", v.title_image)
+                        $template.find(".que-title_image").val(v.title_image)
+                    }
                     $template.find(".preview-option_a").text(v.option_a)
                     $template.find(".preview-option_b").text(v.option_b)
                     $template.find(".preview-option_c").text(v.option_c)
@@ -470,8 +477,23 @@
                     $template.find(".que-option_c").val(v.option_c)
                     $template.find(".que-option_d").val(v.option_d)
 
+                    //隐藏input
+                    $template.find(".que-type").val(v.type)
                     $template.find(".que-paper_id").val(v.paper_id)
                     $template.find(".que-question_no").val(v.question_no)
+                    
+                    if (v.type > 10 && v.type <= 20 && v.question_no ==1){
+                        if (v.article){
+                            $template.find(".que-article").val(v.article)
+                            $template.find(".preview-article").val(v.article)
+                            $template.find(".box-preview-article").show()
+                        }else if (v.src_image){
+                            $template.find(".que-src_image").val(v.src_image)
+                            $template.find(".preview-src_image").attr("src", v.src_image)
+                            $template.find(".preview-src_image").show()
+                        }
+                    }
+                    $template.find(".que-src_image").val(v.src_image)
 
                     $template.find(".que-right_option").val(v.right_option)
                     $template.find(".que-an_explain").val(v.an_explain)
@@ -514,31 +536,59 @@
                 var $template = $(this).closest(".box-template")
                 var box_class = "." + $(this).data("box")
                 if ($(this).hasClass("active")){ //to_hide
-                    console.log("hide")
+                    $(this).find("span").text("添加图片")
+
+                    $template.find(".que-title_image").val("")
+                    $template.find(".preview-title_image").hide()
+                    $template.find(".preview-title_image").attr("src", "")
+                    $template.find(".img-title_image").attr("src", "")
+
+                    $template.find(".file_title_image")[0].value = ""
+
                     var $src_box =  $template.find(box_class)
-                    $src_box.find("input").val("")
-                    $src_box.find("textarea").val("")
-                    $src_box.find("img").attr("src","")
                     $src_box.hide()
                 }else{
-                    console.log(box_class)
+                    $(this).find("span").text("删除图片")
                     $template.find(box_class).show(233)
                 }
                 
             })
 
-            $(".file_image").on("change",function(){
-                var $img = $(this).next("img")
-                var $file_image = $(this);
-                var fileObj = $file_image[0];
-                var windowURL = window.URL || window.webkitURL;
-                var dataURL;
-
+            //TODO
+            $(".up-que-sound").on("change",function(){
+                var $show_input = $(this).next("input")
+                var fileObj = $(this)[0]
+                console.log(fileObj.files)
                 if (fileObj && fileObj.files && fileObj.files[0]) {
-                    dataURL = windowURL.createObjectURL(fileObj.files[0]);
-                    $img.attr('src', dataURL);
+                    //选择了文件
+                    var file_name = fileObj.files[0].name
+                    console.log("file selected:",file_name)
+                    $show_input.val(file_name)
                 } else {
-                    console.log("file_image else...")
+                    //没有选择文件
+                    console.log("file not ...")
+    
+                }
+            })
+
+            $(".file_title_image,.file_src_image").on("change",function(){
+                var $img = $(this).next("img")
+                var fileObj = $(this)[0]
+                var windowURL = window.URL || window.webkitURL
+                var dataURL
+                console.log(fileObj.files)
+                if (fileObj && fileObj.files && fileObj.files[0]) {
+                    //选择了文件
+                    console.log("file selected ...")
+                    dataURL = windowURL.createObjectURL(fileObj.files[0])
+                    $img.attr('src', dataURL)
+
+                    var $template = $(this).closest(".box-template")
+                    if ( $(this).hasClass("file_title_image") ) $template.find(".que-title_image").val("")
+                    if ( $(this).hasClass("file_src_image") ) $template.find(".que-src_image").val("")
+                } else {
+                    //没有选择文件
+                    console.log("file not ...")
     
                 }
             })
@@ -547,8 +597,31 @@
                 $(this).css("opacity",0)
                 var $template = $(this).closest(".box-template")
                 //var question = $template.data("question")
+                var que_type = $template.find(".que-type").val().trim()
                 var que_no = $template.find(".que-question_no").val().trim()
+                var article = $template.find(".que-article").val().trim()
                 var right_option = $template.find(".que-right_option").val().trim()
+                var title_image = $template.find(".preview-title_image").attr("src")
+
+                if(title_image != "") {
+                    console.log(title_image)
+                    $template.find("label.title_image > span").text("删除图片")
+                    $template.find("label.title_image").addClass("active")
+                    $template.find(".box-title-image").show()
+
+                    $template.find(".file_title_image")[0].value = ""
+                }else{
+                    $template.find("label.title_image > span").text("添加图片")
+                    $template.find("label.title_image").removeClass("active")
+                    $template.find(".box-title-image").hide()
+                }
+
+                if (que_type > 10 && que_type <= 20 && que_no == 1){
+                    $template.find(".btn-type-read").show()
+                    if (article) $template.find(".label-article").trigger("click")
+                }else if (que_type > 20 && que_no == 1){
+                    $template.find(".box-type-sound").show()
+                }
 
                 var right_option_class = ".right_option_" + right_option.toLowerCase()
                 $template.find(right_option_class).addClass("active")
@@ -571,6 +644,7 @@
                 var que_no = $template.find(".que-question_no").val().trim()
                 $("#que-add").data("que_no", que_no)
 
+                var article = $template.find(".que-article").val().trim()
                 var title = $template.find(".que-title").val().trim()
                 var option_a = $template.find(".que-option_a").val().trim()
                 var option_b = $template.find(".que-option_b").val().trim()
@@ -578,6 +652,7 @@
                 var option_d = $template.find(".que-option_d").val().trim()
 
                 $template.find(".preview-question_no").text(que_no)
+                $template.find(".preview-article").val(article)
                 $template.find(".preview-title").text(title)
                 $template.find(".preview-option_a").text(option_a)
                 $template.find(".preview-option_b").text(option_b)
@@ -596,7 +671,8 @@
             $(".que-save").on("click",function(){
                 $(this).css("opacity",0)
                 var $template = $(this).closest(".box-template")
-                var formData = new FormData($template.find("form")[0]);
+                var formData = new FormData($template.find("form")[0])
+                $("#box-loading").show()
                 $.ajax({
                     type: "post",
                     crossDomain: true,
@@ -606,8 +682,28 @@
                     processData: false,
                     contentType: false,
                     success: function(data){
-                        console.log(data)
+                        //如果上传了图片
+                        var title_image = data.data.title_image
+                        var src_image = data.data.src_image
+                        console.log(title_image,src_image)
+                        if(title_image){
+                            $template.find(".preview-title_image").attr("src", title_image)
+                            $template.find(".preview-title_image").show()
+
+                            $template.find(".img-title_image").attr("src", title_image)
+                            $template.find(".que-title_image").val(title_image)
+                        }
+                        if(src_image){
+                            
+                            $template.find(".box-preview-article").hide()
+                            $template.find(".preview-src_image").show()
+                            $template.find(".preview-src_image").attr("src", src_image)
+                        }
                         showQuePreview($template)
+                    },
+                    complete: function(data){
+                        console.log(data)
+                        $("#box-loading").hide()
                     }
                 })
             })
@@ -630,6 +726,15 @@
                 console.log(que_type, que_no)
                 var $box = $("#box-question")
                 var $template = $("#template-que").clone(true)
+
+                if (que_type > 10 && que_type <= 20 && que_no == 1){
+                    $template.find(".btn-type-read").show()
+                    $template.find(".label-article").trigger("click")
+                    $template.find(".box-preview-article").show()
+                }else if (que_type > 20 && que_no == 1){
+                    $template.find(".box-type-sound").show()
+                }
+
                 $(this).data("que_no", que_no)
                 var edit = $("#box-question").data("edit")
                 edit = edit + 1
@@ -641,12 +746,6 @@
                 $template.find(".que-paper_id").val(paper_id)
                 $template.find(".que-type").val(que_type)
 
-                //类型与素材
-                if (que_type == "4" || que_type == "5"){
-                    //听解题
-                    $template.find(".src-que:eq(2)").trigger("click")
-                    $template.find(".src-que:eq(2)").addClass("active")
-                }
                 $(this).hide()
                 $template.find(".que-preview").hide()
                 $template.find(".que-preview-edit").show()
@@ -659,6 +758,7 @@
             var savePaper = function(t_paper){
                 console.log(t_paper)
                 $("#paper-bar").css("width", "0%")
+                $("#box-loading").show()
                 $.ajax({
                     type: "post",
                     crossDomain: true,
@@ -668,6 +768,9 @@
                         console.log(data)
                         $("#paper-bar").css("width", "100%")
                         $("#paper-menu").show(666)
+                    },
+                    complete: function(data){
+                        $("#box-loading").hide()
                     }
                 })
             }
@@ -694,9 +797,18 @@
                 $("#paper-menu").hide()
             })
 
-            $(".btn-que-type > label").on("click",function(){
+            $(".btn-type-read > label").on("click",function(){
+                var $template = $(this).closest(".box-template")
+                var box_class = "." + $(this).data("box")
+                console.log(box_class)
+                $template.find(".box-type-article").hide()
+                $template.find(".box-type-image").hide()
+                $template.find(box_class).show()
+            })
+
+            $(".que-big-type > label").on("click",function(){
                 //隐藏所有
-                $(".que-big-type").hide()
+                $(".s-que-type").hide()
                 $("#box-question").hide()
                 $(".box-template").hide()
 
@@ -722,22 +834,20 @@
                 */
             })
 
-            $(".que-big-type > select").on("change",function(){
-                var que_type = $(this).val()
+            $(".s-que-type > select").on("change",function(){
+                var que_type = parseInt($(this).val())
                 console.log(que_type)
                 //把 试题类型/试题编号 放在 '+' 按钮上
                 var que_no = 0
                 $("#que-add").data("type", que_type)
 
                 //隐藏所有
-                $(".box-template").each(function(){
-                    $(this).hide(233)
-                })
+                $(".box-template").hide()
                 if (que_type == 0) return
                 //显示对应类型的试题
-                $("#que-add").show(233)
-                $("#box-question").show(233)
-                $("#box-que-bar").show(233)
+                $("#que-add").show()
+                $("#box-question").show()
+                $("#box-que-bar").show()
                 var que_type_class = ".type_" + que_type
                 $(que_type_class).each(function(){
                     que_no += 1
@@ -771,7 +881,11 @@
 </header>
 
 <body>
-<div class="box-loading" style="display: none"></div>
+
+<div id="box-loading" class="box-loading" style="display: none">
+    <img src="https://systems-1256378396.cos.ap-guangzhou.myqcloud.com/up_loading.png" alt="...">
+</div>
+
     <div id="modal-to" class="modal fade bs-example-modal-lg" aria-hidden="true" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="to_list">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -844,7 +958,6 @@
                         <div class="box-question-title">
                         <form id="form-que-title" class="form-horizontal" enctype="multipart/form-data">
                             <strong class="pull-right menu-que pointer">
-                                <span class="paper-delete glyphicon glyphicon-trash" aria-hidden="true" style="display: none"></span>
                                 <span class="paper-save glyphicon glyphicon-floppy-save" aria-hidden="true" style="display: none"></span>
                             </strong>
                                 <div class="form-group">
@@ -880,7 +993,7 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 text-primary control-label">试卷说明:</label>
                                     <div class="col-sm-9">
-                                        <textarea name="an_explain" class="que-an_explain form-control" rows="3"></textarea>
+                                        <textarea name="attention" class="que-an_explain form-control" rows="3"></textarea>
                                     </div>
                                 </div>
                         </form>
@@ -893,7 +1006,7 @@
 </div>
 <div id="paper-menu" class="text-center" style="display: none;margin-bottom: 20px;">
     
-    <div class="btn-que-type btn-group" data-toggle="buttons">
+    <div class="que-big-type btn-group" data-toggle="buttons">
         <label data-type="0" class="btn btn-default">
             <input type="radio" name="options" autocomplete="off">试卷预览
         </label>
@@ -911,7 +1024,7 @@
         </label>
     </div>
 
-    <div id="type_select" class="que-big-type" style="margin: 10px auto 10px;width:400px;display: none">
+    <div id="type_select" class="s-que-type" style="margin: 10px auto 10px;width:400px;display: none">
         <select class="text-center form-control">
             <option value="1">选择题1--根据汉字选假名 / 根据假名选汉字</option>
             <option value="2">选择题2--选择合适的单词(句意)</option>
@@ -921,21 +1034,22 @@
         </select>
     </div>
 
-    <div id="type_read" class="que-big-type" style="margin: 10px auto 10px;width:400px;display: none">
+    <div id="type_read" class="s-que-type" style="margin: 10px auto 10px;width:400px;display: none">
         <select class="text-center form-control">
-            <option value="6">阅读题--第一篇</option>
-            <option value="6">阅读题--第二篇</option>
-            <option value="6">阅读题--第三篇</option>
-            <option value="6">阅读题--第四篇</option>
-            <option value="6">阅读题--第五篇</option>
+            <option value="11">阅读题--第一篇</option>
+            <option value="12">阅读题--第二篇</option>
+            <option value="13">阅读题--第三篇</option>
+            <option value="14">阅读题--第四篇</option>
+            <option value="15">阅读题--第五篇</option>
         </select>
     </div>
 
-    <div id="type_listen" class="que-big-type" style="margin: 10px auto 10px;width:400px;display: none">
+    <div id="type_listen" class="s-que-type" style="margin: 10px auto 10px;width:400px;display: none">
         <select class="text-center form-control">
-            <option value="7">听解题1--语音+图片+选项</option>
-            <option value="8">听解题2--语音+选项</option>
-            <option value="9">听解题3--语音</option>
+            <option value="21">听解题1--语音/图片/选项</option>
+            <option value="22">听解题2--语音/图片/选项</option>
+            <option value="23">听解题3--语音/图片/选项</option>
+            <option value="24">听解题4--语音/选项</option>
         </select>
     </div>
 
@@ -947,25 +1061,18 @@
 </div>
             <div id="box-question" class="box-question" data-edit="0" style="display: none">
 
-                <div class="box-que-article form-group">
-                    <label class="text-primary control-label">阅读材料:</label>
-                    <textarea name="" class="form-control" rows="6"></textarea>
-                </div>
-                <div class="box-que-sound form-group">
-                    <label class="text-primary control-label mg-right">语音材料:</label>
-                    <div style="display: inline-flex">
-                        <input id="que-sound" name="file_sound" class="up-que-sound pointer" type="file">
-                        <input type="text" class="form-control" style="width: 500px" readonly>
-                        <button type="button" class="que-sound-listen btn btn-default" style="display: none">试听</button>
-                    </div>
-                </div>
-
                 <div id="template-que" class="box-template" style="display: none">
                     <div class="que-preview">
                         <strong class="pull-right menu-que pointer">
                             <span class="que-edit glyphicon glyphicon-edit" aria-hidden="true" style="display: none"></span>
                         </strong>
+                        <div class="box-preview-article form-groupe" style="display: none">
+                            <label class="text-primary control-label">阅读材料:</label>
+                            <textarea class="preview-article form-control" rows="6" readonly></textarea>
+                        </div>
+                        <img class="que-src-image preview-src_image" src="" style="display: none">
                         <h4><strong class="preview-question_no text-info mg-right"></strong><span class="preview-title">世界杯的作用是?</span></h4>
+                        <img class="que-image preview-title_image" src="" style="display: none">
                         <p><strong class="text-primary mg-right">A.</strong><span class="preview-option_a">许愿</span></p>
                         <p><strong class="text-primary mg-right">B.</strong><span class="preview-option_b">喝酒</span></p>
                         <p><strong class="text-primary mg-right">C.</strong><span class="preview-option_c">摆饰</span></p>
@@ -976,8 +1083,17 @@
                             <span class="que-save glyphicon glyphicon-floppy-save" aria-hidden="true" style="display: none"></span>
                         </strong>
                         <div class="btn-group" data-toggle="buttons">
-                            <label class="src-que btn btn-sm btn-default" data-box="box-que-image">
-                                <input type="checkbox" autocomplete="off">图片素材
+                            <label class="src-que btn btn-sm btn-default title_image" data-box="box-title-image">
+                                <input type="checkbox" autocomplete="off"><span>添加图片</span>
+                            </label>
+                        </div>
+
+                        <div class="btn-type-read btn-group" data-toggle="buttons" style="display: none">
+                            <label class="btn btn-sm btn-default label-article" data-box="box-type-article">
+                                <input type="radio" autocomplete="off"><span>阅读材料(文字)</span>
+                            </label>
+                            <label class="btn btn-sm btn-default label-image" data-box="box-type-image">
+                                <input type="radio" autocomplete="off"><span>阅读材料(图片)</span>
                             </label>
                         </div>
                         <hr>
@@ -986,22 +1102,31 @@
                             <input class="que-paper_id" name="paper_id" type="hidden" value="0">
                             <input class="que-question_no" name="question_no" type="hidden" value="0">
                             <input class="que-uploader" name="uploader" type="hidden" value="someone">
+                            <input class="que-title_image" name="title_image" type="hidden" value="">
+                            <input class="que-src_image" name="src_image" type="hidden" value="">
 
-                            <div class="box-que-article form-group" style="display: none">
-                                <label class="text-primary col-sm-2 control-label">阅读材料:</label>
-                                <div class="col-sm-9">
-                                    <textarea name="article" class="form-control" rows="6"></textarea>
-                                </div>
+                            <div class="box-type-article form-groupe" style="display: none">
+                                <label class="text-primary control-label">阅读材料:</label>
+                                <textarea name="article" class="que-article form-control" rows="8"></textarea>
                             </div>
-                            <div class="box-que-image form-group" style="display: none">
+                            <div class="box-type-image form-group" style="display: none">
                                 <label class="text-primary col-sm-2 control-label">图片材料:</label>
-                                <div class="col-sm-9">
+                                <div class="col-sm-8">
                                     <div class="box-content">
-                                        <input name="file_image" class="file_image up-que-image pointer" type="file">
-                                        <img class="que-image" src="">
+                                        <input name="file_src_image" class="file_src_image up-que-src-image pointer" type="file">
+                                        <img class="que-src-image" src="">
                                     </div>
                                 </div>
                             </div>
+                            <div class="box-type-sound form-group" style="display: none">
+                                <label class="text-primary control-label mg-right">语音材料:</label>
+                                <div style="display: inline-flex">
+                                    <input name="file_sound" class="up-que-sound pointer" type="file">
+                                    <input type="text" class="form-control" placeholder="点击选择音频" style="width: 450px" readonly>
+                                    <button type="button" class="que-sound-listen btn btn-default" style="display: none">试听</button>
+                                </div>
+                            </div>
+
                             <hr>
                             <div class="form-group">
                                 <label class="text-primary col-sm-1 control-label">
@@ -1009,6 +1134,15 @@
                                 </label>
                                 <div class="col-sm-9">
                                     <textarea name="title" class="que-title form-control" rows="2" placeholder="题目"></textarea>
+                                </div>
+                            </div>
+                            <div class="box-title-image form-group" style="display: none">
+                                <label class="text-primary col-sm-1 control-label">图片:</label>
+                                <div class="col-sm-9">
+                                    <div class="box-content">
+                                        <input name="file_title_image" class="file_title_image up-que-image pointer" type="file">
+                                        <img class="que-image img-title_image" src="">
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -1047,9 +1181,6 @@
                                 </div>
                                 <button type="button" data-option="D" class="right_option right_option_d btn btn-default col-sm-2">正解</button>
                             </div>
-                            <strong class="pull-right menu-que pointer">
-                                <span class="que-delete glyphicon glyphicon-trash" aria-hidden="true" style="display: none"></span>
-                            </strong>
                             <hr>
                             <div class="form-group">
                                 <label class="text-primary col-sm-2 control-label">正解:</label>
