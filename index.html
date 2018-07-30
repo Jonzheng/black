@@ -69,7 +69,7 @@
                 })
             })
 
-            $("#btn-all").on("click", function(){
+            $("#btn-prepare").on("click", function(){
                 $.ajax({
                     url: url,
                     type: "post",
@@ -390,6 +390,7 @@
                     $("#paper-title").data("paper_id", paper.paper_id)
                     $("#paper-title").val(paper.title)
                     $("#paper-description").val(paper.description)
+                    $("#paper-attention").val(paper.attention)
                     var tar_level = '#paper-level > option[value="'+paper.level+'"]'
                     $(tar_level).attr("selected", true)
                     var tar_diff = "#paper-"+paper.difficulty
@@ -403,6 +404,7 @@
                     $("#paper-title").data("paper_id", paper_id)
                     $("#paper-title").val("")
                     $("#paper-description").val("")
+                    $("#paper-attention").val("")
                     $("#level-default").attr("selected", true)
                     $("#paper-normal").trigger("click")
                     $("#paper-bar").css("width", "0%")
@@ -432,8 +434,8 @@
             }
 
             //查询试卷
-            $("#btn-question").on("click",function(){
-                console.log("btn-question")
+            $("#btn-paper").on("click",function(){
+                console.log("btn-paper")
                 $.ajax({
                     type: "post",
                     crossDomain: true,
@@ -491,6 +493,11 @@
                             $template.find(".que-src_image").val(v.src_image)
                             $template.find(".preview-src_image").attr("src", v.src_image)
                             $template.find(".preview-src_image").show()
+                        }
+                    }else if(v.type > 20 && v.question_no ==1){
+                        if(v.src_sound){
+                            $template.find(".preview-src_sound").attr("src", v.src_sound)
+                            $template.find(".preview-src_sound").show()
                         }
                     }
                     $template.find(".que-src_image").val(v.src_image)
@@ -554,7 +561,6 @@
                 
             })
 
-            //TODO
             $(".up-que-sound").on("change",function(){
                 var $show_input = $(this).next("input")
                 var fileObj = $(this)[0]
@@ -682,9 +688,11 @@
                     processData: false,
                     contentType: false,
                     success: function(data){
+                        $("#box-loading").hide()
                         //如果上传了图片
                         var title_image = data.data.title_image
                         var src_image = data.data.src_image
+                        var src_sound = data.data.src_sound
                         console.log(title_image,src_image)
                         if(title_image){
                             $template.find(".preview-title_image").attr("src", title_image)
@@ -694,10 +702,13 @@
                             $template.find(".que-title_image").val(title_image)
                         }
                         if(src_image){
-                            
+                            $template.find(".preview-src_image").attr("src", src_image)
                             $template.find(".box-preview-article").hide()
                             $template.find(".preview-src_image").show()
-                            $template.find(".preview-src_image").attr("src", src_image)
+                        }
+                        if(src_sound){
+                            $template.find(".preview-src_sound").attr("src", src_sound)
+                            $template.find(".preview-src_sound").show()
                         }
                         showQuePreview($template)
                     },
@@ -779,6 +790,7 @@
                 var $title = $("#paper-title")
                 var title = $title.val().trim()
                 var description = $("#paper-description").val().trim()
+                var attention = $("#paper-attention").val()
                 var level = $("#paper-level").val()
                 var difficulty = $("#paper-difficulty").find('label[class="btn btn-default active"] > input').val()
 
@@ -788,7 +800,7 @@
                 }
                 var paper_id = $title.data("paper_id")
                 var uploader = __openid
-                var t_paper = {paper_id,title,description,level,difficulty,uploader}
+                var t_paper = {paper_id,title,description,attention,level,difficulty,uploader}
                 savePaper(t_paper)
             })
 
@@ -862,16 +874,23 @@
                 loadSound(src_audio, 1)
             })
 
+            //备战完成时
+            $("#modal-to").on('hidden.bs.modal', function (e) {
+                $("#btn-prepare").trigger("click")
+            })
+
             //试卷隐藏时
             $("#modal-paper").on('hidden.bs.modal', function (e) {
                 console.log("hidden...")
                 $("#box-question").hide()
                 $("#box-que-bar").hide()
+                $(".s-que-type").hide()
                 $(".box-template").each(function(){
                     if($(this).attr("id") == undefined){
                         $(this).remove()
                     }
                 })
+                $("#btn-paper").trigger("click")
             })
         })
 
@@ -956,7 +975,7 @@
 
                     <div class="modal-body">
                         <div class="box-question-title">
-                        <form id="form-que-title" class="form-horizontal" enctype="multipart/form-data">
+                        <form class="form-horizontal" enctype="multipart/form-data">
                             <strong class="pull-right menu-que pointer">
                                 <span class="paper-save glyphicon glyphicon-floppy-save" aria-hidden="true" style="display: none"></span>
                             </strong>
@@ -993,7 +1012,7 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 text-primary control-label">试卷说明:</label>
                                     <div class="col-sm-9">
-                                        <textarea name="attention" class="que-an_explain form-control" rows="3"></textarea>
+                                        <textarea id="paper-attention" name="attention" class="que-an_explain form-control" rows="3"></textarea>
                                     </div>
                                 </div>
                         </form>
@@ -1071,6 +1090,9 @@
                             <textarea class="preview-article form-control" rows="6" readonly></textarea>
                         </div>
                         <img class="que-src-image preview-src_image" src="" style="display: none">
+                        <audio class="preview-src_sound" src="" controls="controls" style="display: none">
+                        Your browser does not support the audio element.
+                        </audio>
                         <h4><strong class="preview-question_no text-info mg-right"></strong><span class="preview-title">世界杯的作用是?</span></h4>
                         <img class="que-image preview-title_image" src="" style="display: none">
                         <p><strong class="text-primary mg-right">A.</strong><span class="preview-option_a">许愿</span></p>
@@ -1226,10 +1248,10 @@
             <label class="btn btn-default active">
                 <input type="radio" name="options" autocomplete="off" checked>战斗式神
             </label>
-            <label id='btn-all' class="btn btn-default">
+            <label id='btn-prepare' class="btn btn-default">
                 <input type="radio" name="options" autocomplete="off">备战式神
             </label>
-            <label id="btn-question" class="btn btn-default">
+            <label id="btn-paper" class="btn btn-default">
                 <input type="radio" name="options" autocomplete="off">试卷
             </label>
         </div>
