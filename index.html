@@ -16,6 +16,7 @@
             const pre = "https://audio-1256378396.cos.ap-guangzhou.myqcloud.com/"
 
             const save_paper = 'https://06mdkod2.qcloud.la/weapp/savePaper'
+            const update_paper = 'https://06mdkod2.qcloud.la/weapp/updatePaper'
             const save_question = 'https://06mdkod2.qcloud.la/weapp/saveQuestion'
             const query_paper = 'https://06mdkod2.qcloud.la/weapp/queryPaper'
             const query_question = 'https://06mdkod2.qcloud.la/weapp/queryQuestion'
@@ -349,7 +350,7 @@
                     map_paper[paper_id] = v
                     var title = v.title
                     var description = v.description
-                    var total = v.total
+                    var que_count = v.que_count
                     var level = v.level
                     var difficulty = v.difficulty
                     var uploader = "somebody"
@@ -359,7 +360,7 @@
                         _prepare = "prepare"
                     }
                     var c_date = v.c_date.substr(0,10)
-                    var d_td = `<tr class="pointer ${_prepare}" data-paper_id=${paper_id}><td>${line}</td><td>${title}</td><td>${description}</td><td>${total}</td><td>${level}</td><td>${difficulty}</td><td>${uploader}</td><td>${c_date}</td></tr>`
+                    var d_td = `<tr class="pointer ${_prepare}" data-paper_id=${paper_id}><td>${line}</td><td>${title}</td><td>${description}</td><td>${que_count}</td><td>${level}</td><td>${difficulty}</td><td>${uploader}</td><td>${c_date}</td></tr>`
                     $("#t_paper > tbody").append(d_td)
                 }
 
@@ -396,9 +397,10 @@
                     var tar_diff = "#paper-"+paper.difficulty
                     $(tar_diff).trigger("click")
                     //查询试题
-                    loadQuestion(paper.paper_id)
+                    loadQuestion(paper.paper_id, 0)
                     $("#paper-bar").css("width", "100%")
                     $("#paper-menu").show(233)
+                    $("#paper-menu").find("label").removeClass("active")
                 }else{
                     var paper_id = new Date().getTime()
                     $("#paper-title").data("paper_id", paper_id)
@@ -514,8 +516,39 @@
                 }
             }
 
+            var initSubmitPaper = function(t_question){
+                console.log("initSubmitPaper...")
+                var type1_count = 0
+                var type2_count = 0
+                var type3_count = 0
+                var $submit = $("#box-paper-submit")
+                var type_map = {}
+                //大题型--题目数量
+                for (let v of t_question){
+                    if (!type_map[v.type]) type_map[v.type] = 0
+                    type_map[v.type] += 1
+                    if (v.type <= 10){
+                        type1_count += 1
+                    }else if (v.type <= 20){
+                        type2_count += 1
+                    }else if (v.type <= 30){
+                        type3_count += 1
+                    }
+                }
+                //小题型
+                for (let type in type_map){
+                    var type_class = ".type_" + type
+                    $submit.find(type_class).find("strong").text(type_map[type])
+                    $submit.find(type_class).show()
+                }
+                $submit.find(".cate_1 strong").text(type1_count)
+                $submit.find(".cate_2 strong").text(type2_count)
+                $submit.find(".cate_3 strong").text(type3_count)
+                console.log(type1_count, type2_count, type3_count)
+            }
+
             //查询试题:paper_id
-            var loadQuestion = function(paper_id){
+            var loadQuestion = function(paper_id, type){
                 console.log("loadQuestion...")
                 $.ajax({
                     type: "post",
@@ -524,7 +557,11 @@
                     data: {paper_id},
                     success: function(data){
                         var t_question = data.data
-                        initPreviewQuestion(t_question)
+                        if (type == 0){
+                            initPreviewQuestion(t_question)
+                        }else if (type == 1){
+                            initSubmitPaper(t_question)
+                        }
                     },
                     error: function(data){
                         console.log(data)
@@ -766,19 +803,34 @@
                 $template.show(233)
             })
 
-            var savePaper = function(t_paper){
-                console.log(t_paper)
-                $("#paper-bar").css("width", "0%")
+            var savePaper = function(paper){
+                console.log(paper)
                 $("#box-loading").show()
                 $.ajax({
                     type: "post",
                     crossDomain: true,
                     url: save_paper,
-                    data: t_paper,
+                    data: paper,
                     success: function(data){
                         console.log(data)
-                        $("#paper-bar").css("width", "100%")
                         $("#paper-menu").show(666)
+                    },
+                    complete: function(data){
+                        $("#box-loading").hide()
+                    }
+                })
+            }
+
+            var updatePaper = function(paper){
+                console.log(paper)
+                $("#box-loading").show()
+                $.ajax({
+                    type: "post",
+                    crossDomain: true,
+                    url: update_paper,
+                    data: paper,
+                    success: function(data){
+                        console.log(data)
                     },
                     complete: function(data){
                         $("#box-loading").hide()
@@ -800,8 +852,8 @@
                 }
                 var paper_id = $title.data("paper_id")
                 var uploader = __openid
-                var t_paper = {paper_id,title,description,attention,level,difficulty,uploader}
-                savePaper(t_paper)
+                var paper = {paper_id,title,description,attention,level,difficulty,uploader}
+                savePaper(paper)
             })
 
             $(".paper-delete").on("click",function(){
@@ -822,9 +874,11 @@
                 //隐藏所有
                 $(".s-que-type").hide()
                 $("#box-question").hide()
+                $("#box-paper-submit").hide()
+                $(".box-type-count").hide()
                 $(".box-template").hide()
-
-                var id_type = "#"+$(this).data("type")
+                var type = $(this).data("type")
+                var id_type = "#" + type
                 $(id_type).show()
                 $(id_type).find("option").each(function(){
                     $(this).removeAttr("selected")
@@ -832,18 +886,15 @@
                 var $option = $(id_type).find("option:eq(0)")
                 $option.attr("selected", true)
                 $(id_type).find("select").trigger("change")
-                /*
-                //试卷预览
-                if (id_type == "0"){
+
+                //预览&发布
+                if (type == "0"){
                     $("#que-add").hide()
-                    for (let i of [1,2,3,4]){
-                        var que_type_class = ".type_" + i
-                        $(que_type_class).each(function(){
-                            $(this).show(233)
-                        })
-                    }
+                    $("#box-question").show()
+                    $("#box-paper-submit").show()
+                    var paper_id =  $("#paper-title").data("paper_id")
+                    loadQuestion(paper_id, 1)
                 }
-                */
             })
 
             $(".s-que-type > select").on("change",function(){
@@ -866,6 +917,20 @@
                     $(this).show(233)
                 })
                 $("#que-add").data("que_no", que_no)
+            })
+
+
+            $("#btn-paper-submit").on("click",function(){
+                var $submit = $("#box-paper-submit")
+                var paper_id = $("#paper-title").data("paper_id")
+                var type1_count = $submit.find(".cate_1 strong").text()
+                var type2_count = $submit.find(".cate_2 strong").text()
+                var type3_count = $submit.find(".cate_3 strong").text()
+                var time_limit = $submit.find("#paper-time_limit").val().trim()
+                if (!time_limit) time_limit = 100
+                var status = $submit.find("#paper-status > .active > input").val()
+                var paper = {paper_id, type1_count, type2_count, type3_count, time_limit, status}
+                updatePaper(paper)
             })
 
             $("#btn-play").on("click",function(){
@@ -1045,11 +1110,10 @@
 
     <div id="type_select" class="s-que-type" style="margin: 10px auto 10px;width:400px;display: none">
         <select class="text-center form-control">
-            <option value="1">选择题1--根据汉字选假名 / 根据假名选汉字</option>
-            <option value="2">选择题2--选择合适的单词(句意)</option>
+            <option value="1">选择题1--根据汉字选假名/根据假名选汉字</option>
+            <option value="2">选择题2--选择合适的单词</option>
             <option value="3">选择题3--选择意思相近的句子</option>
-            <option value="4">选择题4--选择合适的单词(文法)</option>
-            <option value="5">选择题5--适当的顺序连接成句子(选择★位置的选项)</option>
+            <option value="4">选择题4--适当的顺序连接成句子(选择★位置的选项)</option>
         </select>
     </div>
 
@@ -1079,6 +1143,86 @@
     </div>
 </div>
             <div id="box-question" class="box-question" data-edit="0" style="display: none">
+
+                <div id="box-paper-submit" style="display: none">
+                    <h3 class="cate_1">选择题 <small><span class="type-que-count"><strong class="text-info">0</strong> 题</span></small></h3>
+                    <div>
+                        <div class="box-type-count type_1" style="display: none">
+                            <span>选择题1--根据汉字选假名/根据假名选汉字</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                        </div>
+                        <div class="box-type-count type_2" style="display: none">
+                            <span>选择题2--选择合适的单词</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                        </div>
+                        <div class="box-type-count type_3" style="display: none">
+                            <span>选择题3--选择意思相近的句子</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                        </div>
+                        <div class="box-type-count type_4" style="display: none">
+                            <span>选择题4--适当的顺序连接成句子(选择★位置的选项)</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                        </div>
+                    </div>
+                    <h3 class="cate_2">阅读题 <small><span class="type-que-count"><strong class="text-info">0</strong> 题</span></small></h3>
+                    <div>
+                        <div class="box-type-count type_11" style="display: none">
+                            <span>阅读题--第一篇</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                        </div>
+                        <div class="box-type-count type_12" style="display: none">
+                            <span>阅读题--第二篇</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                        </div>
+                        <div class="box-type-count type_13" style="display: none">
+                            <span>阅读题--第三篇</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                        </div>
+                        <div class="box-type-count type_14" style="display: none">
+                            <span>阅读题--第四篇</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                        </div>
+                        <div class="box-type-count type_15" style="display: none">
+                            <span>阅读题--第五篇</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                        </div>
+                    </div>
+                    <h3 class="cate_3">听解题 <small><span class="type-que-count"><strong class="text-info">0</strong> 题</span></small></h3>
+                    <div>
+                        <div class="box-type-count type_21" style="display: none">
+                            <span>听解题1--语音/图片/选项</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                        </div>
+                        <div class="box-type-count type_22" style="display: none">
+                            <span>听解题2--语音/图片/选项</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                        </div>
+                        <div class="box-type-count type_23" style="display: none">
+                            <span>听解题3--语音/图片/选项</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                        </div>
+                        <div class="box-type-count type_24" style="display: none">
+                            <span>听解题4--语音/选项</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                        </div>
+                    </div>
+                    <hr>
+
+                    <div class="form-group">
+                        <div class="col-sm-4">
+                            <input id="paper-time_limit" type="text" placeholder="考试时间(分钟)" class="form-control">
+                        </div>
+                        <div id="paper-status" class="btn-group" data-toggle="buttons">
+                            <label class="btn btn-default active">
+                                <input type="radio" value="0" name="options" autocomplete="off">准备中
+                            </label>
+                            <label class="btn btn-default">
+                                <input type="radio" value="1" name="options" autocomplete="off">发布
+                            </label>
+                        </div>
+                        <button id="btn-paper-submit" class="btn btn-default btn-primary" style="width: 200px; margin-left: 60px;">更 新</button>
+                    </div>
+                </div>
 
                 <div id="template-que" class="box-template" style="display: none">
                     <div class="que-preview">
