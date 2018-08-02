@@ -15,6 +15,10 @@
             const publishUrls = 'https://418980938.omoz.club/weapp/publishAudio'
             const pre = "https://audio-1256378396.cos.ap-guangzhou.myqcloud.com/"
 
+            const query_list = 'https://06mdkod2.qcloud.la/weapp/queryList'
+            const publish_audio = 'https://06mdkod2.qcloud.la/weapp/publishAudio'
+            const update_publish = 'https://06mdkod2.qcloud.la/weapp/updatePublish'
+            const query_audio = 'https://06mdkod2.qcloud.la/weapp/queryAudio'
             const save_paper = 'https://06mdkod2.qcloud.la/weapp/savePaper'
             const update_paper = 'https://06mdkod2.qcloud.la/weapp/updatePaper'
             const save_question = 'https://06mdkod2.qcloud.la/weapp/saveQuestion'
@@ -70,13 +74,25 @@
                 })
             })
 
-            $("#btn-prepare").on("click", function(){
+            $("#btn-battle").on("click", function(){
                 $.ajax({
-                    url: url,
+                    url: query_list,
                     type: "post",
                     crossDomain: true,
                     success: function(data){
-                        var t_audio = data.data.t_list
+                        var t_list = data.data
+                        initTableList(t_list)
+                    }
+                });
+            })
+
+            $("#btn-prepare").on("click", function(){
+                $.ajax({
+                    url: query_audio,
+                    type: "post",
+                    crossDomain: true,
+                    success: function(data){
+                        var t_audio = data.data.t_audio
                         var content = data.data.content
                         //initMap(content)
                         initMapAudio(t_audio)
@@ -166,7 +182,6 @@
                 console.log("initBoxShadow")
                 var s_shadow = shadow + ""
                 $("#s-shadow").val(s_shadow)
-                //$("#btn-save").data("s_shadow", s_shadow)
                 $("#box-shadow > span").remove()
                 for (let v of shadow){
                     var d_sd = `<span class="ele" style="height:${v}px"></span>`
@@ -225,7 +240,7 @@
 
             var initMapAudio = function(t_audio){
                 console.log("initMapAudio")
-                //console.log(t_audio)
+                console.log(t_audio)
                 for (let val of t_audio){
                     var file_id = val.file_id
                     file_ids.push(file_id)
@@ -242,10 +257,10 @@
                 }
             }
 
-            $("#file_audio").on("change",function(){
+            $("#file_src_image").on("change",function(){
                 var $img = $(this).next("img")
-                var $file_audio = $(this);
-                var fileObj = $file_audio[0];
+                var $file_src_image = $(this);
+                var fileObj = $file_src_image[0];
                 var windowURL = window.URL || window.webkitURL;
                 var dataURL;
 
@@ -253,7 +268,7 @@
                     dataURL = windowURL.createObjectURL(fileObj.files[0]);
                     $img.attr('src', dataURL);
                 } else {
-                    console.log("file_audio else...")
+                    console.log("file_src_image else...")
                 }
             })
 
@@ -266,36 +281,74 @@
                 $(p_id).text(_val)
             })
 
-            $("#btn-save").on("click",function(){
-                console.log("save")
-                var $title = $("#s-title")
-                if (!$title.val()){
-                    $title.focus()
-                    return
-                }
+            $("#btn-publish").on("click",function(){
+                var _url = $(this).data("_url")
+                console.log("btn-publish")
+                $("#modal-to input").each(function(){
+                    if ( $(this).val().trim() == "" ){
+                        $(this).focus()
+                        return
+                    }
+                })
                 var formData = new FormData($("#my-form")[0]);
+                $("#box-loading").show()
                 $.ajax({
                     type: "post",
                     crossDomain: true,
-                    url: publishUrl,
+                    url: _url,
                     data: formData,
                     cache: false,
                     processData: false,
                     contentType: false,
                     success: function(data){
+                        $("#box-loading").hide()
                         console.log(data)
                         $("#modal-to").modal("hide")
                     }
                 })
             })
 
-            var initModal = function(file_id, src_audio){
-                $("#m-title").text(file_id)
-                $("#src-audio").text(src_audio)
+            var initModalAudio = function(file_id, src_audio){
+                $("#modal-to input").val("")
+                $("#m-title").text("")
+                $("#file_src_image").next("img").attr("src", "")
                 $("#s-file_id").val(file_id)
-                $("#s-title").val("")
-                $("#s-serifu").val("")
-                $("#s-roma").val("")
+                if (src_audio){
+                    $("#btn-publish").data("_url", publish_audio)
+                    $("#s-src_audio").val(src_audio)
+                    $("#m-title").text(file_id)
+                    initBoxShadow([])
+                }else{
+                    $("#btn-publish").data("_url", update_publish)
+                    $.ajax({
+                        url: query_audio,
+                        type: "post",
+                        crossDomain: true,
+                        data: {file_id},
+                        success: function(data){
+                            var list = data.data.t_list[0]
+                            var audio = data.data.t_audio[0]
+                            console.log(list)
+                            console.log(audio)
+                            $("#s-src_audio").val(audio.src_audio)
+                            $("#s-c_name").val(audio.c_name)
+
+                            $("#file_src_image").next("img").attr("src", list.src_image)
+                            $("#m-title").text(list.title)
+
+                            $("#s-src_image").val(list.src_image)
+                            $("#s-title").val(list.title)
+                            $("#s-serifu").val(list.serifu)
+                            $("#s-roma").val(list.roma)
+                            $("#s-stars").val(list.stars)
+
+                            var shadow = audio.shadow.split(",")
+                            initBoxShadow(shadow)
+                        }
+                    })
+                }
+
+                $("#modal-to").modal("show")
             }
 
             var initTableContent = function(content){
@@ -332,9 +385,7 @@
                     console.log("prepare_click")
                     var src_audio = $(this).data("src")
                     var file_id = $(this).data("file_id")
-                    initModal(file_id, src_audio)
-                    initBoxShadow([])
-                    $("#modal-to").modal("show")
+                    initModalAudio(file_id, src_audio)
                 })
             }
 
@@ -343,6 +394,7 @@
                 $("#t_paper").show()
                 $("#t_paper > tbody tr").remove()
                 console.log(t_paper)
+                var _prepare = "prepare"
                 var map_paper = {}
                 for (let [i,v] of t_paper.entries()){
                     var line = i+1
@@ -351,16 +403,15 @@
                     var title = v.title
                     var description = v.description
                     var que_count = v.que_count
+                    var time_limit = v.time_limit
                     var level = v.level
                     var difficulty = v.difficulty
-                    var uploader = "somebody"
-                    var _prepare = ""
-                    if (v.uploader == __openid){
-                        uploader = __auth_name
-                        _prepare = "prepare"
+                    var status = "准备中"
+                    if (v.status == 1){
+                        status = "On"
                     }
                     var c_date = v.c_date.substr(0,10)
-                    var d_td = `<tr class="pointer ${_prepare}" data-paper_id=${paper_id}><td>${line}</td><td>${title}</td><td>${description}</td><td>${que_count}</td><td>${level}</td><td>${difficulty}</td><td>${uploader}</td><td>${c_date}</td></tr>`
+                    var d_td = `<tr class="pointer ${_prepare}" data-paper_id=${paper_id}><td>${line}</td><td>${title}</td><td>${description}</td><td>${que_count}</td><td>${time_limit}</td><td>${level}</td><td>${difficulty}</td><td>${status}</td><td>${c_date}</td></tr>`
                     $("#t_paper > tbody").append(d_td)
                 }
 
@@ -415,24 +466,32 @@
                 $("#modal-paper").modal("show")
             }
 
-            var initTable = function(t_audio){
-                console.log("init_table")
-                //t_audio.sort((a,b) => {return a.c_name > b.c_name})
-                for (let [i,v] of t_audio.entries()){
-                    var line = i+1
+            var initTableList = function(t_list){
+                console.log("initTableList...")
+                console.log(t_list)
+                $("table").hide()
+                $("#t_list").show()
+                $("#t_list > tbody tr").remove()
+                var line = 0
+                for (let v of t_list){
+                    line += 1
                     var file_id = v.file_id
-                    var c_name = v.c_name
-                    var s_name = v.s_name
-                    var src = v.src_audio
-                    var c_date = v.c_date
-                    var cate = v.cate
                     var level = v.level
-                    var ski = v.ski
-                    var ver = v.ver
-                    var status = v.status
-                    var d_td = `<tr><td>${line}</td><td>${level}</td><td>${file_id}</td><td>${c_name}</td><td>${ski}</td><td>${ver}</td><td>${s_name}</td><td>${cate}</td><td>${c_date}</td><td>${status}</td></tr>`
-                    $("#t_audio > tbody").append(d_td)
+                    var title = v.title
+                    var serifu = v.serifu
+                    var roma = v.roma
+                    var stars = v.stars
+
+                    var d_td = `<tr class="prepare pointer" data-file_id="${file_id}"><td>${line}</td><td>${level}</td><td>${title}</td><td>${serifu}</td><td>${roma}</td><td>${stars}</td></tr>`
+                    $("#t_list > tbody").append(d_td)
                 }
+
+                $("#t_list .prepare").click(function(){
+                    console.log("prepare_click")
+                    var file_id = $(this).data("file_id")
+                    console.log(file_id)
+                    initModalAudio(file_id, "")
+                })
             }
 
             //查询试卷
@@ -659,7 +718,7 @@
                     $template.find(".box-title-image").hide()
                 }
 
-                if (que_type > 10 && que_type <= 20 && que_no == 1){
+                if (que_type > 10 && que_type <= 20 && que_no == 1 || que_type == 11){
                     $template.find(".btn-type-read").show()
                     if (article) $template.find(".label-article").trigger("click")
                 }else if (que_type > 20 && que_no == 1){
@@ -775,7 +834,7 @@
                 var $box = $("#box-question")
                 var $template = $("#template-que").clone(true)
 
-                if (que_type > 10 && que_type <= 20 && que_no == 1){
+                if (que_type > 10 && que_type <= 20 && que_no == 1 || que_type == 11){
                     $template.find(".btn-type-read").show()
                     $template.find(".label-article").trigger("click")
                     $template.find(".box-preview-article").show()
@@ -934,14 +993,15 @@
             })
 
             $("#btn-play").on("click",function(){
-                var src_audio = $("#src-audio").text()
+                var src_audio = $("#s-src_audio").val()
                 console.log(src_audio)
                 loadSound(src_audio, 1)
             })
 
             //备战完成时
             $("#modal-to").on('hidden.bs.modal', function (e) {
-                $("#btn-prepare").trigger("click")
+                //$("#btn-battle").trigger("click")
+                console.log("modal-to hidden")
             })
 
             //试卷隐藏时
@@ -981,11 +1041,13 @@
                             <form id="my-form" class="form-horizontal" enctype="multipart/form-data">
                                 <input id="s-shadow" name="shadow" type="hidden">
                                 <input id="s-file_id" name="file_id" type="hidden">
+                                <input id="s-src_image" name="src_image" type="hidden">
+                                <input id="s-src_audio" name="src_audio" type="hidden">
+
                                 <div class="box-content">
-                                    <input id="file_audio" name="file_audio" class="up-image pointer" type="file">
+                                    <input id="file_src_image" name="file_src_image" class="up-image pointer" type="file">
                                     <img class="box-image" src="">
                                     <div class="box-text">
-                                        <p id="src-audio" class="hidden"></p>
                                         <strong><p id="p-title" class="text-primary"></p></strong>
                                         <p id="p-serifu" class="text-primary"></p>
                                         <p id="p-roma" class="text-primary"></p>
@@ -1016,7 +1078,13 @@
                                 <div class="form-group">
                                     <label class="text-primary col-sm-2 control-label">罗马音:</label>
                                     <div class="col-sm-9">
-                                        <input id="s-roma" name="roma" type="text" class="form-control">
+                                        <input id="s-roma" name="roma" type="text" class="form-control" spellcheck="false">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="text-primary col-sm-2 control-label">排序:</label>
+                                    <div class="col-sm-9">
+                                        <input id="s-stars" name="stars" type="number" class="form-control">
                                     </div>
                                 </div>
                             </form>
@@ -1024,7 +1092,7 @@
 
                         <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                        <button id="btn-save" type="button" class="btn btn-primary">保存</button>
+                        <button id="btn-publish" type="button" class="btn btn-primary">保存</button>
                     </div>
             </div>
         </div>
@@ -1111,19 +1179,19 @@
     <div id="type_select" class="s-que-type" style="margin: 10px auto 10px;width:400px;display: none">
         <select class="text-center form-control">
             <option value="1">选择题1--根据汉字选假名/根据假名选汉字</option>
-            <option value="2">选择题2--选择合适的单词</option>
+            <option value="2">选择题2--选择合适的单词/单词正确用法</option>
             <option value="3">选择题3--选择意思相近的句子</option>
-            <option value="4">选择题4--适当的顺序连接成句子(选择★位置的选项)</option>
+            <option value="4">选择题4--连词成句(选择★位置的选项)</option>
         </select>
     </div>
 
     <div id="type_read" class="s-que-type" style="margin: 10px auto 10px;width:400px;display: none">
         <select class="text-center form-control">
-            <option value="11">阅读题--第一篇</option>
-            <option value="12">阅读题--第二篇</option>
-            <option value="13">阅读题--第三篇</option>
-            <option value="14">阅读题--第四篇</option>
-            <option value="15">阅读题--第五篇</option>
+            <option value="11">阅读题--短篇(1问题/篇)</option>
+            <option value="12">阅读题--中篇/长篇(2-5问/篇)</option>
+            <option value="13">阅读题--中篇/长篇(2-5问/篇)</option>
+            <option value="14">阅读题--中篇/长篇(2-5问/篇)</option>
+            <option value="15">阅读题--中篇/长篇(2-5问/篇)</option>
         </select>
     </div>
 
@@ -1145,65 +1213,65 @@
             <div id="box-question" class="box-question" data-edit="0" style="display: none">
 
                 <div id="box-paper-submit" style="display: none">
-                    <h3 class="cate_1">选择题 <small><span class="type-que-count"><strong class="text-info">0</strong> 题</span></small></h3>
+                    <h3 class="cate_1">选择题 <small><span class="type-que-count"><strong class="text-info">0</strong> 问</span></small></h3>
                     <div>
                         <div class="box-type-count type_1" style="display: none">
                             <span>选择题1--根据汉字选假名/根据假名选汉字</span>
-                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
                         <div class="box-type-count type_2" style="display: none">
-                            <span>选择题2--选择合适的单词</span>
-                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                            <span>选择题2--选择合适的单词/单词正确用法</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
                         <div class="box-type-count type_3" style="display: none">
                             <span>选择题3--选择意思相近的句子</span>
-                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
                         <div class="box-type-count type_4" style="display: none">
-                            <span>选择题4--适当的顺序连接成句子(选择★位置的选项)</span>
-                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                            <span>选择题4--连词成句(选择★位置的选项)</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
                     </div>
-                    <h3 class="cate_2">阅读题 <small><span class="type-que-count"><strong class="text-info">0</strong> 题</span></small></h3>
+                    <h3 class="cate_2">阅读题 <small><span class="type-que-count"><strong class="text-info">0</strong> 问</span></small></h3>
                     <div>
                         <div class="box-type-count type_11" style="display: none">
-                            <span>阅读题--第一篇</span>
-                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                            <span>阅读题--短篇(1问题/篇)</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
                         <div class="box-type-count type_12" style="display: none">
-                            <span>阅读题--第二篇</span>
-                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                            <span>阅读题--中篇/长篇(2-5问题/篇)</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
                         <div class="box-type-count type_13" style="display: none">
-                            <span>阅读题--第三篇</span>
-                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                            <span>阅读题--中篇/长篇(2-5问题/篇)</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
                         <div class="box-type-count type_14" style="display: none">
-                            <span>阅读题--第四篇</span>
-                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                            <span>阅读题--中篇/长篇(2-5问题/篇)</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
                         <div class="box-type-count type_15" style="display: none">
-                            <span>阅读题--第五篇</span>
-                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                            <span>阅读题--中篇/长篇(2-5问题/篇)</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
                     </div>
-                    <h3 class="cate_3">听解题 <small><span class="type-que-count"><strong class="text-info">0</strong> 题</span></small></h3>
+                    <h3 class="cate_3">听解题 <small><span class="type-que-count"><strong class="text-info">0</strong> 问</span></small></h3>
                     <div>
                         <div class="box-type-count type_21" style="display: none">
                             <span>听解题1--语音/图片/选项</span>
-                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
                         <div class="box-type-count type_22" style="display: none">
                             <span>听解题2--语音/图片/选项</span>
-                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
                         <div class="box-type-count type_23" style="display: none">
                             <span>听解题3--语音/图片/选项</span>
-                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
                         <div class="box-type-count type_24" style="display: none">
                             <span>听解题4--语音/选项</span>
-                            <span class="type-que-count"><strong class="text-info">0</strong> 题</span>
+                            <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
                     </div>
                     <hr>
@@ -1217,7 +1285,7 @@
                                 <input type="radio" value="0" name="options" autocomplete="off">准备中
                             </label>
                             <label class="btn btn-default">
-                                <input type="radio" value="1" name="options" autocomplete="off">发布
+                                <input type="radio" value="1" name="options" autocomplete="off">On
                             </label>
                         </div>
                         <button id="btn-paper-submit" class="btn btn-default btn-primary" style="width: 200px; margin-left: 60px;">更 新</button>
@@ -1389,10 +1457,10 @@
         </div>
                 
         <div id="top-menu" class="btn-group" data-toggle="buttons" style="display: none">
-            <label class="btn btn-default active">
+            <label id="btn-battle" class="btn btn-default">
                 <input type="radio" name="options" autocomplete="off" checked>战斗式神
             </label>
-            <label id='btn-prepare' class="btn btn-default">
+            <label id="btn-prepare" class="btn btn-default">
                 <input type="radio" name="options" autocomplete="off">备战式神
             </label>
             <label id="btn-paper" class="btn btn-default">
@@ -1402,19 +1470,15 @@
     </div>
     <hr>
     <div class="">
-        <table id="t_audio" class="table table-bordered table-striped table-hover" style="display: none">
+        <table id="t_list" class="table table-bordered table-striped table-hover" style="display: none">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>level</th>
-                    <th>file_id</th>
-                    <th>c_name</th>
-                    <th>ski</th>
-                    <th>ver</th>
-                    <th>s_name</th>
-                    <th>cate</th>
-                    <th>c_date</th>
-                    <th>status</th>
+                    <th>稀有度</th>
+                    <th>标题</th>
+                    <th>式神台词</th>
+                    <th>罗马音</th>
+                    <th>排序</th>
                 </tr>
             </thead>
             <tbody>
@@ -1445,9 +1509,10 @@
                     <th>标题</th>
                     <th>备注</th>
                     <th>题目数</th>
+                    <th>考试时间</th>
                     <th>日语等级</th>
                     <th>难度</th>
-                    <th>创建者</th>
+                    <th>状态</th>
                     <th>创建时间</th>
                 </tr>
             </thead>

@@ -5,6 +5,11 @@ body{
     width:96%;
 }
 
+thead{
+    color: #337ab7;
+    text-align: center;
+}
+
 .pointer{
     cursor: pointer;
 }
