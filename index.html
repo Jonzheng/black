@@ -596,7 +596,7 @@
                 }
                 //小题型
                 for (let type in type_map){
-                    var type_class = ".type_" + type
+                    var type_class = ".pre_type_" + type
                     $submit.find(type_class).find("strong").text(type_map[type])
                     $submit.find(type_class).show()
                 }
@@ -936,6 +936,7 @@
                 $("#box-paper-submit").hide()
                 $(".box-type-count").hide()
                 $(".box-template").hide()
+                $("#box-question").data("edit", 0)
                 var type = $(this).data("type")
                 var id_type = "#" + type
                 $(id_type).show()
@@ -971,7 +972,8 @@
                 $("#box-question").show()
                 $("#box-que-bar").show()
                 var que_type_class = ".type_" + que_type
-                $(que_type_class).each(function(){
+                $("#box-question").data("edit", 0)
+                $("#box-question").find(que_type_class).each(function(){
                     que_no += 1
                     $(this).show(233)
                 })
@@ -1215,61 +1217,61 @@
                 <div id="box-paper-submit" style="display: none">
                     <h3 class="cate_1">选择题 <small><span class="type-que-count"><strong class="text-info">0</strong> 问</span></small></h3>
                     <div>
-                        <div class="box-type-count type_1" style="display: none">
+                        <div class="box-type-count pre_type_1" style="display: none">
                             <span>选择题1--根据汉字选假名/根据假名选汉字</span>
                             <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
-                        <div class="box-type-count type_2" style="display: none">
+                        <div class="box-type-count pre_type_2" style="display: none">
                             <span>选择题2--选择合适的单词/单词正确用法</span>
                             <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
-                        <div class="box-type-count type_3" style="display: none">
+                        <div class="box-type-count pre_type_3" style="display: none">
                             <span>选择题3--选择意思相近的句子</span>
                             <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
-                        <div class="box-type-count type_4" style="display: none">
+                        <div class="box-type-count pre_type_4" style="display: none">
                             <span>选择题4--连词成句(选择★位置的选项)</span>
                             <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
                     </div>
                     <h3 class="cate_2">阅读题 <small><span class="type-que-count"><strong class="text-info">0</strong> 问</span></small></h3>
                     <div>
-                        <div class="box-type-count type_11" style="display: none">
+                        <div class="box-type-count pre_type_11" style="display: none">
                             <span>阅读题--短篇(1问题/篇)</span>
                             <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
-                        <div class="box-type-count type_12" style="display: none">
+                        <div class="box-type-count pre_type_12" style="display: none">
                             <span>阅读题--中篇/长篇(2-5问题/篇)</span>
                             <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
-                        <div class="box-type-count type_13" style="display: none">
+                        <div class="box-type-count pre_type_13" style="display: none">
                             <span>阅读题--中篇/长篇(2-5问题/篇)</span>
                             <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
-                        <div class="box-type-count type_14" style="display: none">
+                        <div class="box-type-count pre_type_14" style="display: none">
                             <span>阅读题--中篇/长篇(2-5问题/篇)</span>
                             <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
-                        <div class="box-type-count type_15" style="display: none">
+                        <div class="box-type-count pre_type_15" style="display: none">
                             <span>阅读题--中篇/长篇(2-5问题/篇)</span>
                             <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
                     </div>
                     <h3 class="cate_3">听解题 <small><span class="type-que-count"><strong class="text-info">0</strong> 问</span></small></h3>
                     <div>
-                        <div class="box-type-count type_21" style="display: none">
+                        <div class="box-type-count pre_type_21" style="display: none">
                             <span>听解题1--语音/图片/选项</span>
                             <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
-                        <div class="box-type-count type_22" style="display: none">
+                        <div class="box-type-count pre_type_22" style="display: none">
                             <span>听解题2--语音/图片/选项</span>
                             <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
-                        <div class="box-type-count type_23" style="display: none">
+                        <div class="box-type-count pre_type_23" style="display: none">
                             <span>听解题3--语音/图片/选项</span>
                             <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
-                        <div class="box-type-count type_24" style="display: none">
+                        <div class="box-type-count pre_type_24" style="display: none">
                             <span>听解题4--语音/选项</span>
                             <span class="type-que-count"><strong class="text-info">0</strong> 问</span>
                         </div>
