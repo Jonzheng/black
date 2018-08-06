@@ -531,10 +531,12 @@
                     if (question.article){
                         $template.find(".que-article").val(question.article)
                         $template.find(".preview-article").val(question.article)
+                        $template.find(".preview-src_image").hide()
                         $template.find(".box-preview-article").show()
                     }else if (question.src_image){
                         $template.find(".que-src_image").val(question.src_image)
                         $template.find(".preview-src_image").attr("src", question.src_image)
+                        $template.find(".box-preview-article").hide()
                         $template.find(".preview-src_image").show()
                     }
                 }else if(question.type > 20 && question.question_no ==1){
@@ -973,7 +975,7 @@
 </div>
 
     <div id="modal-to" class="modal fade bs-example-modal-lg" aria-hidden="true" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="to_list">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-lg" role="document" style="width: 1120px">
             <div class="modal-content">
                     <div class="modal-header">
                         <h4 class="modal-title" id="m-title">file_id</h4>
@@ -1002,31 +1004,31 @@
                                 <div class="form-group">
                                     <label class="text-primary col-sm-2 control-label">式神名字:</label>
                                     <div class="col-sm-9">
-                                        <input id="s-c_name" name="c_name" type="text" class="form-control">
+                                        <input id="s-c_name" name="c_name" type="text" class="form-control" autocomplete="off">
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="text-primary col-sm-2 control-label">标题:</label>
                                     <div class="col-sm-9">
-                                        <input id="s-title" name="title" type="text" class="form-control">
+                                        <input id="s-title" name="title" type="text" class="form-control" autocomplete="off">
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="text-primary col-sm-2 control-label">台词:</label>
                                     <div class="col-sm-9">
-                                    <input id="s-serifu" name="serifu" type="text" class="form-control">
+                                    <input id="s-serifu" name="serifu" type="text" class="form-control" autocomplete="off">
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="text-primary col-sm-2 control-label">罗马音:</label>
                                     <div class="col-sm-9">
-                                        <input id="s-roma" name="roma" type="text" class="form-control" spellcheck="false">
+                                        <input id="s-roma" name="roma" type="text" class="form-control" spellcheck="false" autocomplete="off">
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="text-primary col-sm-2 control-label">排序:</label>
                                     <div class="col-sm-9">
-                                        <input id="s-stars" name="stars" type="number" class="form-control">
+                                        <input id="s-stars" name="stars" type="number" class="form-control" autocomplete="off">
                                     </div>
                                 </div>
                             </form>
@@ -1042,7 +1044,7 @@
 <!-- modal end -->
 
 <div id="modal-paper" class="modal fade bs-example-modal-lg" aria-hidden="true" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="to_list">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-lg" role="document" style="width: 1120px">
         <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">编辑试题</h4>
@@ -1057,7 +1059,7 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 text-primary control-label">标题:</label>
                                     <div class="col-sm-8">
-                                    <input id="paper-title" name="title" type="text" class="form-control">
+                                    <input id="paper-title" name="title" type="text" class="form-control" autocomplete="off">
                                     </div>
                                 </div>
                                     <div class="form-group">
@@ -1326,7 +1328,7 @@
                                     <strong class="text-info mg-right">A.</strong>
                                 </label>
                                 <div class="col-sm-6">
-                                    <input name="option_a" placeholder="选项A" type="text" class="que-option_a form-control">
+                                    <input name="option_a" placeholder="选项A" type="text" class="que-option_a form-control" autocomplete="off">
                                 </div>
                                 <button type="button" data-option="A" class="right_option right_option_a btn btn-default col-sm-2">正解</button>
                             </div>
@@ -1335,7 +1337,7 @@
                                     <strong class="text-info mg-right">B.</strong>
                                 </label>
                                 <div class="col-sm-6">
-                                    <input name="option_b" placeholder="选项B" type="text" class="que-option_b form-control">
+                                    <input name="option_b" placeholder="选项B" type="text" class="que-option_b form-control" autocomplete="off">
                                 </div>
                                 <button type="button" data-option="B" class="right_option right_option_b btn btn-default col-sm-2">正解</button>
                             </div>
@@ -1344,7 +1346,7 @@
                                     <strong class="text-info mg-right">C.</strong>
                                 </label>
                                 <div class="col-sm-6">
-                                    <input name="option_c" placeholder="选项C" type="text" class="que-option_c form-control">
+                                    <input name="option_c" placeholder="选项C" type="text" class="que-option_c form-control" autocomplete="off">
                                 </div>
                                 <button type="button" data-option="C" class="right_option right_option_c btn btn-default col-sm-2">正解</button>
                             </div>
@@ -1353,7 +1355,7 @@
                                     <strong class="text-info mg-right">D.</strong>
                                 </label>
                                 <div class="col-sm-6">
-                                    <input name="option_d" placeholder="选项D" type="text" class="que-option_d form-control">
+                                    <input name="option_d" placeholder="选项D" type="text" class="que-option_d form-control" autocomplete="off">
                                 </div>
                                 <button type="button" data-option="D" class="right_option right_option_d btn btn-default col-sm-2">正解</button>
                             </div>
@@ -1361,13 +1363,13 @@
                             <div class="form-group">
                                 <label class="text-primary col-sm-2 control-label">正解:</label>
                                 <div class="col-sm-9">
-                                    <input name="right_option" type="text" class="que-right_option form-control">
+                                    <input name="right_option" type="text" class="que-right_option form-control" autocomplete="off">
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="text-primary col-sm-2 control-label">解析:</label>
                                 <div class="col-sm-9">
-                                    <textarea name="an_explain" class="que-an_explain form-control" rows="3"></textarea>
+                                    <textarea name="an_explain" class="que-an_explain form-control" rows="6"></textarea>
                                 </div>
                             </div>
                         </form>
