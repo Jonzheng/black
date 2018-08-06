@@ -9,10 +9,6 @@
         $(function(){
             window.AudioContext = window.AudioContext||window.webkitAudioContext;
             const context = new AudioContext();
-            const url = 'https://06mdkod2.qcloud.la/weapp/queryAudio'
-            const publishUrl = 'https://06mdkod2.qcloud.la/weapp/publishAudio'
-            const urls = 'https://418980938.omoz.club/weapp/queryAudio'
-            const publishUrls = 'https://418980938.omoz.club/weapp/publishAudio'
             const pre = "https://audio-1256378396.cos.ap-guangzhou.myqcloud.com/"
 
             const query_list = 'https://06mdkod2.qcloud.la/weapp/queryList'
@@ -29,12 +25,13 @@
             var key_size = {}
             var file_ids = new Array();
             var __auth_name = ""
-            var __openid = "ocVQY4-dF2m4IiYTTJZFo6k-NZbE"
+            var __openid = "1"
             if(__openid == ""){
+                $("#top-login").show()
                 $("#top-menu").hide()
             }else{
                 $("#top-login").hide()
-                $("#top-menu").show(233)
+                $("#top-menu").show()
             }
 
             $("#auth-btn").on("click", function(){
@@ -257,21 +254,6 @@
                 }
             }
 
-            $("#file_src_image").on("change",function(){
-                var $img = $(this).next("img")
-                var $file_src_image = $(this);
-                var fileObj = $file_src_image[0];
-                var windowURL = window.URL || window.webkitURL;
-                var dataURL;
-
-                if (fileObj && fileObj.files && fileObj.files[0]) {
-                    dataURL = windowURL.createObjectURL(fileObj.files[0]);
-                    $img.attr('src', dataURL);
-                } else {
-                    console.log("file_src_image else...")
-                }
-            })
-
             $("#s-title,#s-serifu,#s-roma").on("keyup",function(){
                 var _val = $(this).val().trim()
                 $(this).val(_val)
@@ -311,7 +293,7 @@
             var initModalAudio = function(file_id, src_audio){
                 $("#modal-to input").val("")
                 $("#m-title").text("")
-                $("#file_src_image").next("img").attr("src", "")
+                $("#img-src_image").attr("src", "")
                 $("#s-file_id").val(file_id)
                 if (src_audio){
                     $("#btn-publish").data("_url", publish_audio)
@@ -333,7 +315,7 @@
                             $("#s-src_audio").val(audio.src_audio)
                             $("#s-c_name").val(audio.c_name)
 
-                            $("#file_src_image").next("img").attr("src", list.src_image)
+                            $("#img-src_image").attr("src", list.src_image)
                             $("#m-title").text(list.title)
 
                             $("#s-src_image").val(list.src_image)
@@ -401,7 +383,6 @@
                     var paper_id = v.paper_id
                     map_paper[paper_id] = v
                     var title = v.title
-                    var description = v.description
                     var que_count = v.que_count
                     var time_limit = v.time_limit
                     var level = v.level
@@ -411,7 +392,7 @@
                         status = "On"
                     }
                     var c_date = v.c_date.substr(0,10)
-                    var d_td = `<tr class="pointer ${_prepare}" data-paper_id=${paper_id}><td>${line}</td><td>${title}</td><td>${description}</td><td>${que_count}</td><td>${time_limit}</td><td>${level}</td><td>${difficulty}</td><td>${status}</td><td>${c_date}</td></tr>`
+                    var d_td = `<tr class="pointer ${_prepare}" data-paper_id=${paper_id}><td>${line}</td><td>${title}</td><td>${que_count}</td><td>${time_limit}</td><td>${level}</td><td>${difficulty}</td><td>${status}</td><td>${c_date}</td></tr>`
                     $("#t_paper > tbody").append(d_td)
                 }
 
@@ -508,66 +489,79 @@
                 })
             })
 
+            var initSamePreview = function($template, question){
+
+                //整个保存
+                $template.data("question", question)
+
+                var low_right = question.right_option.toLowerCase()
+                var preview_right_class = ".preview-option_" + low_right
+                var right_option_class = ".right_option_" + low_right
+                $template.find(right_option_class).addClass("active")
+                $template.find(preview_right_class).addClass("text-primary").wrap("<strong></strong>")
+
+                $template.find(".label-question_no").text(question.no)
+                $template.find(".preview-question_no").text(question.question_no)
+                $template.find(".preview-title").text(question.title)
+                if (question.title_image){
+                    $template.find(".preview-title_image").attr("src", question.title_image)
+                    $template.find(".preview-title_image").show()
+
+                    $template.find(".img-title_image").attr("src", question.title_image)
+                    $template.find(".que-title_image").val(question.title_image)
+                }
+                $template.find(".preview-option_a").text(question.option_a)
+                $template.find(".preview-option_b").text(question.option_b)
+                $template.find(".preview-option_c").text(question.option_c)
+                $template.find(".preview-option_d").text(question.option_d)
+
+                //填充可编辑页
+                $template.find(".que-title").val(question.title)
+                $template.find(".que-option_a").val(question.option_a)
+                $template.find(".que-option_b").val(question.option_b)
+                $template.find(".que-option_c").val(question.option_c)
+                $template.find(".que-option_d").val(question.option_d)
+
+                //填充隐藏input
+                $template.find(".que-type").val(question.type)
+                $template.find(".que-paper_id").val(question.paper_id)
+                $template.find(".que-question_no").val(question.question_no)
+                
+                if (question.type > 10 && question.type <= 20 && question.question_no ==1){
+                    if (question.article){
+                        $template.find(".que-article").val(question.article)
+                        $template.find(".preview-article").val(question.article)
+                        $template.find(".box-preview-article").show()
+                    }else if (question.src_image){
+                        $template.find(".que-src_image").val(question.src_image)
+                        $template.find(".preview-src_image").attr("src", question.src_image)
+                        $template.find(".preview-src_image").show()
+                    }
+                }else if(question.type > 20 && question.question_no ==1){
+                    if(question.src_sound){
+                        $template.find(".preview-src_sound").attr("src", question.src_sound)
+                        $template.find(".preview-src_sound").show()
+                    }
+                }
+
+                $template.find(".que-src_image").val(question.src_image)
+                $template.find(".que-right_option").val(question.right_option)
+                $template.find(".que-an_explain").val(question.an_explain)
+
+                var que_type_class = "type_" + question.type
+                $template.addClass(que_type_class)
+
+            }
+
             //试题分类型预览
             var initPreviewQuestion = function(t_question){
                 console.log("initPreviewQuestion...")
                 for (let v of t_question){
+
                     var $template = $("#template-que").clone(true)
 
-                    //填充数据
-                    $template.data("question", v)
                     //填充预览页
-                    var right_option_class = ".right_option_" + v.right_option.toLowerCase()
-                    $template.find(right_option_class).addClass("active")
-                    $template.find(".preview-question_no").text(v.question_no)
-                    $template.find(".preview-title").text(v.title)
-                    if (v.title_image){
-                        $template.find(".preview-title_image").attr("src", v.title_image)
-                        $template.find(".preview-title_image").show()
-
-                        $template.find(".img-title_image").attr("src", v.title_image)
-                        $template.find(".que-title_image").val(v.title_image)
-                    }
-                    $template.find(".preview-option_a").text(v.option_a)
-                    $template.find(".preview-option_b").text(v.option_b)
-                    $template.find(".preview-option_c").text(v.option_c)
-                    $template.find(".preview-option_d").text(v.option_d)
-
-                    //填充可编辑页
-                    $template.find(".que-title").val(v.title)
-                    $template.find(".que-option_a").val(v.option_a)
-                    $template.find(".que-option_b").val(v.option_b)
-                    $template.find(".que-option_c").val(v.option_c)
-                    $template.find(".que-option_d").val(v.option_d)
-
-                    //隐藏input
-                    $template.find(".que-type").val(v.type)
-                    $template.find(".que-paper_id").val(v.paper_id)
-                    $template.find(".que-question_no").val(v.question_no)
-                    
-                    if (v.type > 10 && v.type <= 20 && v.question_no ==1){
-                        if (v.article){
-                            $template.find(".que-article").val(v.article)
-                            $template.find(".preview-article").val(v.article)
-                            $template.find(".box-preview-article").show()
-                        }else if (v.src_image){
-                            $template.find(".que-src_image").val(v.src_image)
-                            $template.find(".preview-src_image").attr("src", v.src_image)
-                            $template.find(".preview-src_image").show()
-                        }
-                    }else if(v.type > 20 && v.question_no ==1){
-                        if(v.src_sound){
-                            $template.find(".preview-src_sound").attr("src", v.src_sound)
-                            $template.find(".preview-src_sound").show()
-                        }
-                    }
-                    $template.find(".que-src_image").val(v.src_image)
-
-                    $template.find(".que-right_option").val(v.right_option)
-                    $template.find(".que-an_explain").val(v.an_explain)
-
-                    var que_type_class = "type_" + v.type
-                    $template.addClass(que_type_class)
+                    initSamePreview($template, v)
                     
                     //去除id并放到容器
                     $template.removeAttr("id")
@@ -678,16 +672,11 @@
                 var fileObj = $(this)[0]
                 var windowURL = window.URL || window.webkitURL
                 var dataURL
-                console.log(fileObj.files)
                 if (fileObj && fileObj.files && fileObj.files[0]) {
                     //选择了文件
                     console.log("file selected ...")
                     dataURL = windowURL.createObjectURL(fileObj.files[0])
                     $img.attr('src', dataURL)
-
-                    var $template = $(this).closest(".box-template")
-                    if ( $(this).hasClass("file_title_image") ) $template.find(".que-title_image").val("")
-                    if ( $(this).hasClass("file_src_image") ) $template.find(".que-src_image").val("")
                 } else {
                     //没有选择文件
                     console.log("file not ...")
@@ -698,15 +687,9 @@
             $(".que-edit").on("click",function(){
                 $(this).css("opacity",0)
                 var $template = $(this).closest(".box-template")
-                //var question = $template.data("question")
-                var que_type = $template.find(".que-type").val().trim()
-                var que_no = $template.find(".que-question_no").val().trim()
-                var article = $template.find(".que-article").val().trim()
-                var right_option = $template.find(".que-right_option").val().trim()
-                var title_image = $template.find(".preview-title_image").attr("src")
+                var question = $template.data("question")
 
-                if(title_image != "") {
-                    console.log(title_image)
+                if(question.title_image != "") {
                     $template.find("label.title_image > span").text("删除图片")
                     $template.find("label.title_image").addClass("active")
                     $template.find(".box-title-image").show()
@@ -718,17 +701,13 @@
                     $template.find(".box-title-image").hide()
                 }
 
-                if (que_type > 10 && que_type <= 20 && que_no == 1 || que_type == 11){
+                if (question.type > 10 && question.type <= 20 && question.no == 1 || question.type == 11){
                     $template.find(".btn-type-read").show()
                     if (article) $template.find(".label-article").trigger("click")
-                }else if (que_type > 20 && que_no == 1){
+                }else if (question.type > 20 && question.no == 1){
                     $template.find(".box-type-sound").show()
                 }
 
-                var right_option_class = ".right_option_" + right_option.toLowerCase()
-                $template.find(right_option_class).addClass("active")
-                $template.find(".label-question_no").text(que_no)
-                
                 $template.find(".que-preview").hide(666)
                 $template.find(".que-preview-edit").show(666)
                 $template.find(".que-save").css("opacity",1)
@@ -740,27 +719,7 @@
             
             //保存成功--试题预览
             var showQuePreview = function($template){
-                var type = $template.find(".que-type").val().trim()
-                var que_type_class = "type_" + type
-                $template.addClass(que_type_class)
-                var que_no = $template.find(".que-question_no").val().trim()
-                $("#que-add").data("que_no", que_no)
-
-                var article = $template.find(".que-article").val().trim()
-                var title = $template.find(".que-title").val().trim()
-                var option_a = $template.find(".que-option_a").val().trim()
-                var option_b = $template.find(".que-option_b").val().trim()
-                var option_c = $template.find(".que-option_c").val().trim()
-                var option_d = $template.find(".que-option_d").val().trim()
-
-                $template.find(".preview-question_no").text(que_no)
-                $template.find(".preview-article").val(article)
-                $template.find(".preview-title").text(title)
-                $template.find(".preview-option_a").text(option_a)
-                $template.find(".preview-option_b").text(option_b)
-                $template.find(".preview-option_c").text(option_c)
-                $template.find(".preview-option_d").text(option_d)
-
+                $template.find("strong > .preview-option").removeClass("text-primary").unwrap()
                 $template.find(".que-preview-edit").hide(666)
                 $template.find(".que-preview").show(666)
                 $template.find(".que-edit").css("opacity",1)
@@ -785,31 +744,12 @@
                     contentType: false,
                     success: function(data){
                         $("#box-loading").hide()
-                        //如果上传了图片
-                        var title_image = data.data.title_image
-                        var src_image = data.data.src_image
-                        var src_sound = data.data.src_sound
-                        console.log(title_image,src_image)
-                        if(title_image){
-                            $template.find(".preview-title_image").attr("src", title_image)
-                            $template.find(".preview-title_image").show()
-
-                            $template.find(".img-title_image").attr("src", title_image)
-                            $template.find(".que-title_image").val(title_image)
-                        }
-                        if(src_image){
-                            $template.find(".preview-src_image").attr("src", src_image)
-                            $template.find(".box-preview-article").hide()
-                            $template.find(".preview-src_image").show()
-                        }
-                        if(src_sound){
-                            $template.find(".preview-src_sound").attr("src", src_sound)
-                            $template.find(".preview-src_sound").show()
-                        }
+                        var question = data.data
+                        console.log(question)
                         showQuePreview($template)
+                        initSamePreview($template, question)
                     },
                     complete: function(data){
-                        console.log(data)
                         $("#box-loading").hide()
                     }
                 })
@@ -1047,8 +987,8 @@
                                 <input id="s-src_audio" name="src_audio" type="hidden">
 
                                 <div class="box-content">
-                                    <input id="file_src_image" name="file_src_image" class="up-image pointer" type="file">
-                                    <img class="box-image" src="">
+                                    <input name="file_src_image" class="file_src_image up-image pointer" type="file">
+                                    <img id="img-src_image" class="box-image" src="">
                                     <div class="box-text">
                                         <strong><p id="p-title" class="text-primary"></p></strong>
                                         <p id="p-serifu" class="text-primary"></p>
@@ -1123,7 +1063,7 @@
                                     <div class="form-group">
                                         <label class="col-sm-2 text-primary control-label">备注:</label>
                                         <div class="col-sm-4">
-                                            <input id="paper-description" name="description" type="text" class="form-control">
+                                            <input id="paper-description" name="description" type="text" class="form-control" placeholder="写在->说明" disabled>
                                         </div>
                                         <select id="paper-level" class="col-sm-3 form-control paper-level">
                                             <option value="N4">--等级难度--</option>
@@ -1147,7 +1087,7 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 text-primary control-label">试卷说明:</label>
                                     <div class="col-sm-9">
-                                        <textarea id="paper-attention" name="attention" class="que-an_explain form-control" rows="3"></textarea>
+                                        <textarea id="paper-attention" name="attention" class="que-an_explain form-control" rows="3" spellcheck="false"></textarea>
                                     </div>
                                 </div>
                         </form>
@@ -1309,10 +1249,10 @@
                         </audio>
                         <h4><strong class="preview-question_no text-info mg-right"></strong><span class="preview-title">世界杯的作用是?</span></h4>
                         <img class="que-image preview-title_image" src="" style="display: none">
-                        <p><strong class="text-primary mg-right">A.</strong><span class="preview-option_a">许愿</span></p>
-                        <p><strong class="text-primary mg-right">B.</strong><span class="preview-option_b">喝酒</span></p>
-                        <p><strong class="text-primary mg-right">C.</strong><span class="preview-option_c">摆饰</span></p>
-                        <p><strong class="text-primary mg-right">D.</strong><span class="preview-option_d"></span></p>
+                        <p><strong class="text-primary mg-right">A.</strong><span class="preview-option preview-option_a">许愿</span></p>
+                        <p><strong class="text-primary mg-right">B.</strong><span class="preview-option preview-option_b">喝酒</span></p>
+                        <p><strong class="text-primary mg-right">C.</strong><span class="preview-option preview-option_c">摆饰</span></p>
+                        <p><strong class="text-primary mg-right">D.</strong><span class="preview-option preview-option_d"></span></p>
                     </div>
                     <div class="que-preview-edit" style="display: none">
                         <strong class="pull-right menu-que pointer">
@@ -1450,9 +1390,11 @@
     <hr>
     <div class="text-center">
 
-        <div id="top-login" style="width: 20%; margin: 0 auto">
-            <input id="auth-name" placeholder="用户名 / 成员编号" type="text" class="form-control top-auth">
-            <input id="auth-code" placeholder="密码" type="password" class="form-control top-auth">
+        <div id="top-login" class="box-login" style="display: none">
+            <div class="top-auth">
+                <input id="auth-name" placeholder="用户名 / 成员编号" type="text" class="form-control mg-top">
+                <input id="auth-code" placeholder="密码" type="password" class="form-control mg-top">
+            </div>
             <div class="btn-group" role="group" aria-label="...">
                 <button id="auth-btn" type="button" class="btn btn-info top-auth">登录</button>
             </div>
@@ -1509,7 +1451,6 @@
                 <tr>
                     <th>#</th>
                     <th>标题</th>
-                    <th>备注</th>
                     <th>题目数</th>
                     <th>考试时间</th>
                     <th>日语等级</th>

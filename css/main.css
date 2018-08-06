@@ -32,6 +32,16 @@ thead{
     z-index: 9999;
 }
 
+.box-loggin{
+    text-align: center;
+    padding: 120px;
+    position: fixed;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99;
+}
+
 .box-loading > img{
     animation: kf-loading 3s linear infinite;
     opacity: 0.6;
@@ -49,9 +59,13 @@ thead{
     margin-right: 10px;
 }
 
+.mg-top{
+    margin-top: 10px;
+}
+
 .top-auth{
     width: 300px;
-    margin-top: 10px;
+    margin: 10px auto;
 }
 
 .box-image{
