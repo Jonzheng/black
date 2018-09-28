@@ -164,9 +164,9 @@
                         shadow[i] = 5
                     }
                 }
-                //填充到100个元素
+                //填充到105个元素
                 shadow.pop()
-                var fn = 100-shadow.length
+                var fn = 105-shadow.length
                 if (fn > 0){
                     var fill_st = new Array(fn)
                     fill_st.fill(3)
@@ -321,6 +321,7 @@
                             $("#s-src_image").val(list.src_image)
                             $("#s-title").val(list.title)
                             $("#s-serifu").val(list.serifu)
+                            $("#s-koner").val(list.koner)
                             $("#s-roma").val(list.roma)
                             $("#s-stars").val(list.stars)
 
@@ -500,7 +501,7 @@
                 $template.find(right_option_class).addClass("active")
                 $template.find(preview_right_class).addClass("text-primary").wrap("<strong></strong>")
 
-                $template.find(".label-question_no").text(question.no)
+                $template.find(".label-question_no").text(question.question_no)
                 $template.find(".preview-question_no").text(question.question_no)
                 $template.find(".preview-title").text(question.title)
                 if (question.title_image){
@@ -703,10 +704,10 @@
                     $template.find(".box-title-image").hide()
                 }
 
-                if (question.type > 10 && question.type <= 20 && question.no == 1 || question.type == 11){
+                if (question.type > 10 && question.type <= 20 && question.question_no == 1 || question.type == 11){
                     $template.find(".btn-type-read").show()
-                    if (article) $template.find(".label-article").trigger("click")
-                }else if (question.type > 20 && question.no == 1){
+                    if (question.article) $template.find(".label-article").trigger("click")
+                }else if (question.type > 20 && question.question_no == 1){
                     $template.find(".box-type-sound").show()
                 }
 
@@ -1017,6 +1018,12 @@
                                     <label class="text-primary col-sm-2 control-label">台词:</label>
                                     <div class="col-sm-9">
                                     <input id="s-serifu" name="serifu" type="text" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="text-primary col-sm-2 control-label">句译:</label>
+                                    <div class="col-sm-9">
+                                        <input id="s-koner" name="koner" type="text" class="form-control" spellcheck="false" autocomplete="off">
                                     </div>
                                 </div>
                                 <div class="form-group">
