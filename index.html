@@ -254,7 +254,7 @@
                 }
             }
 
-            $("#s-title,#s-serifu,#s-roma").on("keyup",function(){
+            $("#s-title,#s-serifu,#s-roma").on("focusout",function(){
                 var _val = $(this).val().trim()
                 $(this).val(_val)
                 var cur_id = $(this).attr("id")
@@ -273,6 +273,11 @@
                     }
                 })
                 var formData = new FormData($("#my-form")[0]);
+
+                var $form = $("#my-form")
+                var file_id = $form.find("#s-file_id").val().trim()
+                var serifu = $form.find("#s-serifu").val().trim()
+                var koner = $form.find("#s-koner").val().trim()
                 $("#box-loading").show()
                 $.ajax({
                     type: "post",
@@ -284,8 +289,10 @@
                     contentType: false,
                     success: function(data){
                         $("#box-loading").hide()
-                        console.log(data)
                         $("#modal-to").modal("hide")
+                        var $tr = $("#t_list").find("#"+file_id)
+                        $tr.find("td:eq(3)").text(serifu)
+                        $tr.find("td:eq(4)").text(koner)
                     }
                 })
             })
@@ -461,10 +468,10 @@
                     var level = v.level
                     var title = v.title
                     var serifu = v.serifu
-                    var roma = v.roma
+                    var koner = v.koner
                     var stars = v.stars
 
-                    var d_td = `<tr class="prepare pointer" data-file_id="${file_id}"><td>${line}</td><td>${level}</td><td>${title}</td><td>${serifu}</td><td>${roma}</td><td>${stars}</td></tr>`
+                    var d_td = `<tr id="${file_id}" class="prepare pointer" data-file_id="${file_id}"><td>${line}</td><td>${level}</td><td>${title}</td><td>${serifu}</td><td>${koner}</td><td>${stars}</td></tr>`
                     $("#t_list > tbody").append(d_td)
                 }
 
@@ -1430,7 +1437,7 @@
                     <th>稀有度</th>
                     <th>标题</th>
                     <th>式神台词</th>
-                    <th>罗马音</th>
+                    <th>句译</th>
                     <th>排序</th>
                 </tr>
             </thead>
